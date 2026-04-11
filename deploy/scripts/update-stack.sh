@@ -23,7 +23,9 @@ set -a
 source deploy/.env
 set +a
 
-if [[ "${HICLAW_NON_INTERACTIVE:-0}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
+export HICLAW_NON_INTERACTIVE="${HICLAW_NON_INTERACTIVE:-1}"
+
+if [[ "${HICLAW_NON_INTERACTIVE}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
   echo "HICLAW_LLM_API_KEY is required when HICLAW_NON_INTERACTIVE=1" >&2
   exit 3
 fi

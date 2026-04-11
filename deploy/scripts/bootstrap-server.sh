@@ -56,7 +56,10 @@ set -a
 source "$AXIMATE_DEPLOY_DIR/deploy/.env"
 set +a
 
-if [[ "${HICLAW_NON_INTERACTIVE:-0}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
+# Default to unattended install on servers (SSH pipes are non-interactive). Set HICLAW_NON_INTERACTIVE=0 in .env for wizard.
+export HICLAW_NON_INTERACTIVE="${HICLAW_NON_INTERACTIVE:-1}"
+
+if [[ "${HICLAW_NON_INTERACTIVE}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
   log "HICLAW_NON_INTERACTIVE=1 but HICLAW_LLM_API_KEY is empty. Edit $AXIMATE_DEPLOY_DIR/deploy/.env"
   exit 3
 fi
