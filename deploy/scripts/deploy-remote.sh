@@ -14,6 +14,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET="${AXIMATE_DEPLOY_USER}@${AXIMATE_DEPLOY_HOST}"
 SSH_OPTS=()
+if [[ -z "${AXIMATE_SSH_KEY:-}" && -f "${HOME}/.ssh/id_ed25519" ]]; then
+  AXIMATE_SSH_KEY="${HOME}/.ssh/id_ed25519"
+fi
 if [[ -n "${AXIMATE_SSH_KEY:-}" ]]; then
   SSH_OPTS+=(-i "$AXIMATE_SSH_KEY")
 fi

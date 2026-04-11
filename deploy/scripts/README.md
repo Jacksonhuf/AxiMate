@@ -13,6 +13,8 @@ Override with environment variables or PowerShell parameters.
 
 ## Windows (from repo root)
 
+By default **deploy-remote.ps1** uses **`%USERPROFILE%\.ssh\id_ed25519`** when that file exists (same as `Join-Path $env:USERPROFILE '.ssh\id_ed25519'`). Override with `-SshKey "D:\path\to\key"` if needed.
+
 First time on a fresh VM:
 
 ```powershell
@@ -30,12 +32,6 @@ Optional: copy `deploy.config.example.ps1` to `deploy.config.ps1` (gitignored), 
 ```powershell
 . .\deploy\scripts\deploy.config.ps1
 .\deploy\scripts\deploy-remote.ps1
-```
-
-SSH key example:
-
-```powershell
-.\deploy\scripts\deploy-remote.ps1 -SshKey "$env:USERPROFILE\.ssh\id_ed25519"
 ```
 
 ## Server-only (SSH session on the VM)
@@ -61,6 +57,7 @@ sudo bash deploy/scripts/update-stack.sh
 |----------|---------|---------|
 | `AXIMATE_GIT_URL` | `https://github.com/Jacksonhuf/AxiMate.git` | Clone/pull URL (use token in URL for private repos — do not log) |
 | `AXIMATE_DEPLOY_DIR` | `/opt/aximate` | Install path on server |
+| `AXIMATE_SSH_KEY` | *(unset)*; if unset and `~/.ssh/id_ed25519` exists, **deploy-remote.sh** uses it | Identity file for `ssh -i` (Linux/macOS script only) |
 
 ## Security
 

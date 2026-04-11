@@ -5,7 +5,7 @@
 
 $global:AximateDeployHost = "212.50.255.125"
 $global:AximateDeployUser = "root"
-# Optional: path to private key
-# $global:AximateSshKey = "$env:USERPROFILE\.ssh\id_ed25519"
+# Default matches deploy-remote.ps1; override if your key lives elsewhere
+$global:AximateSshKey = Join-Path $env:USERPROFILE ".ssh\id_ed25519"
 $global:AximateDeployDir = "/opt/aximate"
 $global:AximateGitUrl = "https://github.com/Jacksonhuf/AxiMate.git"
