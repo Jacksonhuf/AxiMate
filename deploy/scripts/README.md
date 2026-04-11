@@ -29,6 +29,15 @@ Default SSH key: `%USERPROFILE%\.ssh\id_ed25519` when the file exists.
 .\deploy\scripts\deploy-remote.ps1
 ```
 
+**Push `deploy/.env` to the server (API key stays off Git)** — defaults match Kimi CN (`openai-compat` + `https://api.moonshot.cn/v1` + `kimi-k2.5`):
+
+```powershell
+$env:HICLAW_LLM_API_KEY = 'sk-your-key'
+.\deploy\scripts\deploy-remote.ps1 -PushEnv
+```
+
+Override with `$env:HICLAW_LLM_PROVIDER`, `HICLAW_OPENAI_BASE_URL`, `HICLAW_DEFAULT_MODEL` if needed.
+
 ## Server-only
 
 After pushing this repo to GitHub:
@@ -50,4 +59,4 @@ sudo bash /opt/aximate/deploy/scripts/bootstrap-server.sh
 
 ## Security
 
-SSH keys only; put `HICLAW_LLM_API_KEY` in server `deploy/.env`, never commit it.
+SSH keys only; put `HICLAW_LLM_API_KEY` (and for `openai-compat`, `HICLAW_OPENAI_BASE_URL`) in server `deploy/.env`, never commit it.
