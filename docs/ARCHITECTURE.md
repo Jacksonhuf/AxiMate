@@ -47,3 +47,7 @@
 ## 与合规文档的关系
 
 上游 Apache-2.0 组件的版本、NOTICE 与再分发方式见 `docs/COMPLIANCE-APACHE2.md`。
+
+## 仅基于 CoPaw 的本地开发
+
+不部署 HiClaw 时，可在本机按 `docs/DEV-COPAW.md` 安装与扩展 CoPaw（Skills / MCP）；与 HiClaw 的衔接见该文档末尾。
