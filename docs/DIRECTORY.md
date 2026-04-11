@@ -1,60 +1,76 @@
 # AxiMate 仓库目录设计
 
-AxiMate 基于三个 **独立上游**：**Higress**、**HiClaw**、**CoPaw**（均为 Apache-2.0）。本仓库 **不内嵌** 其源码，用目录表达 **产品边界** 与 **自有扩展**；运行时版本由安装方式与 SBOM 锁定。
+AxiMate 基于三个 **独立上游**：**Higress**、**HiClaw**、**CoPaw**（均为 Apache-2.0）。本仓库 **不内嵌** 其源码；用目录表达 **AxiMate 产品线边界** 与 **自有扩展**。对外合规与 SBOM 须使用上游真实名称与许可证。
+
+## 产品线与目录（意象 · 方案 2 · 水流）
+
+| AxiMate 产品名 | 目录 | 意象 | 上游 |
+|----------------|------|------|------|
+| **AxiMate Spring** | `integrations/spring/` | 泉源 · 统一入口 | Higress |
+| **AxiMate Confluence** | `integrations/confluence/` | 汇流 · 编排协同 | HiClaw |
+| **AxiMate Ripple** | `integrations/ripple/` | 涟漪 · 轻量执行 | CoPaw |
+
+**命名说明：** 「Confluence」为 AxiMate 子品牌，与第三方协作软件可能同名；对外建议使用全称 **AxiMate Confluence**，并标注 *Powered by HiClaw*。
+
+## 为何使用 `integrations/`
+
+| 目录名 | 常见含义 | 本仓库 |
+|--------|----------|--------|
+| `components/` | 易与前端 UI 组件混淆 | 未采用 |
+| `integrations/` | 与外部系统 / 上游的对接与扩展 | **采用** |
+| `packages/` | 可发布多包 workspace | 预留，自有库时再建 |
 
 ## 设计原则
 
-1. **`components/`** — 按上游组件划分 **文档与 AxiMate 自有扩展**；三者平级，职责清晰。  
-2. **`deploy/`** — 保留在 **仓库根目录**，与服务器约定路径 `/opt/aximate/deploy` 一致，避免破坏现有脚本与文档链接。  
-3. **`docs/`** — 跨组件架构、合规、总览类文档。  
-4. **当前阶段** — 优先在 **`components/copaw/`** 落地扩展；HiClaw / Higress 以 `deploy/` 与上游文档为主。
+1. **`integrations/{spring,confluence,ripple}/`** — 与三产品线一一对应；内含 README 与 AxiMate 自有扩展位。  
+2. **`deploy/`** — 固定在 **仓库根目录**，与服务器 **`/opt/aximate/deploy`** 一致（安装 **Confluence 栈**，内含 **Spring** 网关）。  
+3. **`docs/`** — 跨产品线架构、合规、目录说明与 **Ripple** 开发指南（`DEV-RIPPLE.md`）。  
+4. **当前阶段** — 优先在 **`integrations/ripple/extensions/`** 落地扩展。
 
-## 目录树（目标形态）
+## 目录树
 
 ```text
 AxiMate/
-├── README.md                 # 产品总览与入口链接
-├── LICENSE / NOTICE          # 本仓授权与声明
-├── components/               # 三上游：文档 + AxiMate 扩展（无上游子模块）
-│   ├── README.md             # 三组件索引
-│   ├── copaw/                # 【当前优先】CoPaw
-│   │   ├── README.md
-│   │   └── extensions/       # AxiMate 自有 skills / 模板 / 脚本
-│   ├── hiclaw/               # HiClaw（说明 + 指向 deploy/）
+├── README.md
+├── LICENSE / NOTICE
+├── integrations/
+│   ├── README.md                 # Spring / Confluence / Ripple 索引
+│   ├── spring/                   # AxiMate Spring（Higress）
 │   │   └── README.md
-│   └── higress/              # Higress（概念与后续网关笔记）
-│       └── README.md
-├── deploy/                   # 云上安装 HiClaw（含 Higress）— 路径固定
+│   ├── confluence/               # AxiMate Confluence（HiClaw）
+│   │   └── README.md
+│   └── ripple/                   # AxiMate Ripple（CoPaw）— 当前优先扩展
+│       ├── README.md
+│       └── extensions/
+│           └── README.md
+├── deploy/                       # 云上安装 HiClaw（含 Higress）
 │   ├── .env.example
 │   ├── README.md
-│   ├── native/
-│   │   └── install-hiclaw.sh
-│   └── scripts/
-│       ├── bootstrap-server.sh
-│       ├── update-stack.sh
-│       ├── deploy-remote.ps1
-│       └── …
+│   ├── native/install-hiclaw.sh
+│   └── scripts/ …
 └── docs/
-    ├── ARCHITECTURE.md       # 逻辑架构与上游关系
-    ├── DIRECTORY.md          # 本文件
+    ├── ARCHITECTURE.md
+    ├── DIRECTORY.md              # 本文件
     ├── COMPLIANCE-APACHE2.md
-    └── DEV-COPAW.md          # CoPaw 本地开发步骤
+    ├── DEV-RIPPLE.md             # Ripple（CoPaw）本地开发
+    └── DEV-COPAW.md              # 重定向至 DEV-RIPPLE.md
 ```
 
-## 组件与目录对应
+## 产品线、上游与路径对应
 
-| 上游 | 运行时来源 | 本仓库中的位置 |
-|------|------------|----------------|
-| **CoPaw** | `pip` / `docker` / 上游 Git | `components/copaw/` + `docs/DEV-COPAW.md` |
-| **HiClaw** | 官方 `hiclaw-install.sh`（由 `deploy/` 调用） | `deploy/` + `components/hiclaw/README.md` |
-| **Higress** | HiClaw 安装过程拉起 | `components/higress/README.md`（说明）；实操见 HiClaw / Higress 官方文档 |
+| 上游 | 运行时来源 | 本仓库位置 |
+|------|------------|------------|
+| **CoPaw** | pip / docker / 上游 Git | `integrations/ripple/` · `docs/DEV-RIPPLE.md` |
+| **HiClaw** | 官方 `hiclaw-install.sh`（`deploy/` 调用） | `deploy/` · `integrations/confluence/README.md` |
+| **Higress** | HiClaw 安装拉起 | `integrations/spring/README.md`；实操见上游文档 |
 
 ## 后续可扩展（按需）
 
-- `components/hiclaw/patches/` — 仅当需要记录对上游的补丁说明时使用（一般不提交上游源码）。  
-- `components/higress/policies/` — 导出的路由 / Wasm 策略片段（与官方格式对齐）。  
-- `packages/` — 若未来增加 **AxiMate 自有微服务**（gRPC/REST），可与 `components/` 并存。
+- `integrations/confluence/patches/` — 对上游补丁说明（一般不提交上游源码）。  
+- `integrations/spring/policies/` — 路由 / Wasm 策略片段。  
+- **`packages/`** — AxiMate 自有可发布库；与 `integrations/` 并存。
 
-## 变更说明
+## 变更摘要
 
-原根目录 **`copaw-extensions/`** 已合并为 **`components/copaw/extensions/`**，避免与 `components/` 并列时语义重复。
+- `integrations/` 下目录由上游名改为 **产品线目录名**：`spring` / `confluence` / `ripple`。  
+- `docs/DEV-COPAW.md` 重命名为 **`docs/DEV-RIPPLE.md`**；原路径保留 **短重定向文件**。

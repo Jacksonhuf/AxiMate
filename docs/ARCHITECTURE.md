@@ -10,6 +10,18 @@
 
 三者均为 **Apache-2.0**（以各仓库及发布物 `LICENSE` 为准；发版时用 SBOM 锁定版本并复核）。
 
+## AxiMate 产品线命名（意象 · 水流）
+
+对外可使用子品牌与上游并列说明（示例：**AxiMate Spring（Powered by Higress）**）：
+
+| 产品名 | 对应上游 | 意象 |
+|--------|----------|------|
+| **AxiMate Spring** | Higress | 泉源 · 统一入口 |
+| **AxiMate Confluence** | HiClaw | 汇流 · 编排协同 |
+| **AxiMate Ripple** | CoPaw | 涟漪 · 轻量执行 |
+
+仓库目录映射见 **`docs/DIRECTORY.md`**（`integrations/spring|confluence|ripple/`）。
+
 ## 逻辑分层（与上游对应关系）
 
 ```text
@@ -44,12 +56,12 @@
 
 本仓存放文档、合规与 **部署自动化**；运行时镜像与安装逻辑来自 **HiClaw 官方安装脚本** 及上游镜像仓库。
 
-按 **Higress / HiClaw / CoPaw** 三组件划分的物理目录见 **`docs/DIRECTORY.md`**；**`components/`** 下放各组件的说明与 AxiMate 自有扩展（当前优先 **`components/copaw/`**）。**`deploy/`** 固定在仓库根目录，与服务器 `/opt/aximate/deploy` 约定一致。
+按 **Spring / Confluence / Ripple** 产品线划分的物理目录见 **`docs/DIRECTORY.md`**（**`integrations/spring|confluence|ripple/`**）；当前优先在 **`integrations/ripple/`** 扩展。**`deploy/`** 固定在仓库根目录，与服务器 `/opt/aximate/deploy` 约定一致。
 
 ## 与合规文档的关系
 
 上游 Apache-2.0 组件的版本、NOTICE 与再分发方式见 `docs/COMPLIANCE-APACHE2.md`。
 
-## 仅基于 CoPaw 的本地开发
+## 仅基于 Ripple（CoPaw）的本地开发
 
-不部署 HiClaw 时，可在本机按 `docs/DEV-COPAW.md` 安装与扩展 CoPaw（Skills / MCP）；与 HiClaw 的衔接见该文档末尾。
+不部署 Confluence（HiClaw）时，可在本机按 **`docs/DEV-RIPPLE.md`** 安装与扩展 CoPaw（Skills / MCP）；与 HiClaw 的衔接见该文档末尾。
