@@ -23,12 +23,18 @@ All three upstreams are **Apache-2.0** (verify each repo `LICENSE` in your SBOM)
 
 Override with `HICLAW_PORT_*` in `deploy/.env` (see upstream installer).
 
+## LLM API Key（阿里云百炼）
+
+本仓库约定的云上安装方式使用 **阿里云百炼（DashScope）** 的 API Key 填入 **`HICLAW_LLM_API_KEY`**（与 HiClaw Quick Start 中的阿里系模型路径一致）。请在 [阿里云百炼 / DashScope 控制台](https://bailian.console.aliyun.com/) 创建 API Key，写入服务器上的 `deploy/.env`，**勿提交到 Git**。
+
+`deploy/.env.example` 中默认 **`HICLAW_LLM_PROVIDER=alibaba-cloud`**；若改用其它供应商，需自行对照 [HiClaw 安装脚本](https://raw.githubusercontent.com/alibaba/hiclaw/main/install/hiclaw-install.sh) 中的环境变量说明（与 AxiMate 产品约定无关时不在此展开）。
+
 ## First-time deploy
 
 ```bash
 cd deploy
 cp .env.example .env
-# Edit .env: set HICLAW_LLM_API_KEY and any optional HICLAW_* vars
+# Edit .env: set HICLAW_LLM_API_KEY (百炼) and any optional HICLAW_* vars
 ```
 
 On the server (or from Windows: `deploy-remote.ps1 -Bootstrap`):

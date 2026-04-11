@@ -40,7 +40,7 @@ pinned by `HICLAW_VERSION` (and related env vars) in `deploy/.env`.
 
 Native stack on a VM (AlmaLinux, etc.):
 
-1. Copy `deploy/.env.example` → `deploy/.env` and set **`HICLAW_LLM_API_KEY`** (when `HICLAW_NON_INTERACTIVE=1`).
+1. Copy `deploy/.env.example` → `deploy/.env` and set **`HICLAW_LLM_API_KEY`** — use **阿里云百炼（DashScope）** API Key when `HICLAW_NON_INTERACTIVE=1` (see `deploy/README.md`).
 2. Run **`deploy/scripts/bootstrap-server.sh`** on the server (or `deploy-remote.ps1 -Bootstrap` from Windows).
 
 Details, ports, and upgrades: **`deploy/README.md`**.
