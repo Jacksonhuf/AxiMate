@@ -44,6 +44,8 @@
 
 本仓存放文档、合规与 **部署自动化**；运行时镜像与安装逻辑来自 **HiClaw 官方安装脚本** 及上游镜像仓库。
 
+按 **Higress / HiClaw / CoPaw** 三组件划分的物理目录见 **`docs/DIRECTORY.md`**；**`components/`** 下放各组件的说明与 AxiMate 自有扩展（当前优先 **`components/copaw/`**）。**`deploy/`** 固定在仓库根目录，与服务器 `/opt/aximate/deploy` 约定一致。
+
 ## 与合规文档的关系
 
 上游 Apache-2.0 组件的版本、NOTICE 与再分发方式见 `docs/COMPLIANCE-APACHE2.md`。

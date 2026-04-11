@@ -12,18 +12,21 @@ wording in every release SBOM and each project’s `LICENSE`.
 | Orchestration | **HiClaw** | Manager–Workers, Matrix, MinIO, etc. |
 | Worker engine | **CoPaw** | Choose CoPaw as a Worker type in HiClaw (see HiClaw docs) |
 
-This repository holds **product documentation, compliance notes, and deployment glue**
-that invoke the **official HiClaw install script** on your server. It does **not**
-vendor or replace those upstreams.
+This repository holds **product documentation, compliance notes, deployment glue**,
+and **per-upstream extension slots** under `components/`. It invokes the **official
+HiClaw install script** for cloud installs and does **not** vendor upstream source trees.
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
+| **`components/`** | **Higress / HiClaw / CoPaw** — README per upstream + AxiMate-owned assets (**start with `components/copaw/`**) |
+| `components/copaw/extensions/` | Optional: CoPaw skill templates / scripts (see `docs/DEV-COPAW.md`) |
 | `deploy/` | Server bootstrap, `.env` template, SSH helpers, native HiClaw installer wrapper |
 | `deploy/native/` | Thin script: downloads and runs upstream `hiclaw-install.sh` |
-| `docs/` | Architecture, compliance, **CoPaw local dev** (`DEV-COPAW.md`) |
-| `copaw-extensions/` | Optional: AxiMate-owned CoPaw skill templates / scripts (see `docs/DEV-COPAW.md`) |
+| `docs/` | Architecture, **`DIRECTORY.md`** (full tree), compliance, **CoPaw dev** (`DEV-COPAW.md`) |
+
+**Full directory design:** [`docs/DIRECTORY.md`](docs/DIRECTORY.md).
 
 ## Monorepo development model
 
@@ -33,7 +36,7 @@ pinned by `HICLAW_VERSION` (and related env vars) in `deploy/.env`.
 
 ## Local development (CoPaw)
 
-To build on **CoPaw** first (without deploying HiClaw): follow **`docs/DEV-COPAW.md`** — `pip install copaw` / Docker / upstream source install, plus Skills and MCP links.
+To build on **CoPaw** first (without deploying HiClaw): follow **`docs/DEV-COPAW.md`** — `pip install copaw` / Docker / upstream source install, plus Skills and MCP links. Put AxiMate-specific assets under **`components/copaw/extensions/`**.
 
 ## Principles
 

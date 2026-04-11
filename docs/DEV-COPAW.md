@@ -58,8 +58,10 @@ copaw app
 
 ## 在 AxiMate 仓里放什么
 
-- **`copaw-extensions/`**：建议放 **AxiMate 自有的 skill 模板、说明或脚本**；实际加载路径需按 CoPaw 的 working dir / 配置把文件放到 CoPaw 能扫描的位置，或用手动复制、符号链接（以 [Config](https://copaw.agentscope.io/docs/config) 为准）。
+- **`components/copaw/extensions/`**：放 **AxiMate 自有的 skill 模板、说明或脚本**；实际加载路径需按 CoPaw 的 working dir / 配置把文件放到 CoPaw 能扫描的位置，或用手动复制、符号链接（以 [Config](https://copaw.agentscope.io/docs/config) 为准）。
 - **产品逻辑**：优先通过 **Skill + MCP** 扩展，减少对 CoPaw 核心的 fork 面。
+
+目录总览见 **`docs/DIRECTORY.md`**。
 
 ## 与 HiClaw / Higress 的衔接（后续）
 
