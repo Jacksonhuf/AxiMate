@@ -20,7 +20,7 @@
 | **AxiMate Confluence** | HiClaw | 汇流 · 编排协同 |
 | **AxiMate Ripple** | CoPaw | 涟漪 · 轻量执行 |
 
-仓库目录映射见 **`docs/DIRECTORY.md`**（`integrations/spring|confluence|ripple/`）。
+仓库目录映射见 **`docs/DIRECTORY.md`**（`integrations/spring|confluence|ripple/`）。各产品线 **能否单独打包发布** 见 **`docs/PRODUCT-PACKAGING.md`**（项目级规则）。
 
 ## 逻辑分层（与上游对应关系）
 

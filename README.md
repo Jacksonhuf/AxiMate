@@ -30,9 +30,11 @@ HiClaw install script** for cloud installs and does **not** vendor upstream sour
 | **`integrations/ripple/`** | **AxiMate Ripple** — start here for CoPaw extensions (**`integrations/ripple/extensions/`**) |
 | `deploy/` | Server bootstrap, `.env`, SSH helpers, `install-hiclaw.sh` wrapper |
 | `deploy/native/` | Downloads and runs upstream `hiclaw-install.sh` |
-| `docs/` | Architecture, **`DIRECTORY.md`**, compliance, **`DEV-RIPPLE.md`** (Ripple / CoPaw dev) |
+| `docs/` | Architecture, **`DIRECTORY.md`**, **`PRODUCT-PACKAGING.md`** (release rules), compliance, **`DEV-RIPPLE.md`** |
 
 **Full directory design:** [`docs/DIRECTORY.md`](docs/DIRECTORY.md).
+
+**Product packaging / release rules (project-wide):** [`docs/PRODUCT-PACKAGING.md`](docs/PRODUCT-PACKAGING.md) — which lines may ship standalone (Ripple, Spring) vs Confluence as full HiClaw stack.
 
 ## Monorepo development model
 
