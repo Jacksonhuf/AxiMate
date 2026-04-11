@@ -1,0 +1,228 @@
+diff --git a/console/index.html b/console/index.html
+index 18049f1..ea6e8a5 100644
+--- a/console/index.html
++++ b/console/index.html
+@@ -5,6 +5,7 @@
+     <link rel="icon" type="image/svg+xml" href="/copaw-symbol.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>CoPaw Console</title>
++    <!-- Title overridden at runtime when VITE_RIPPLE_DESKTOP=1 (AxiMate Ripple) -->
+     <link rel="preconnect" href="https://fonts.googleapis.com" />
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+     <link
+diff --git a/console/src/App.tsx b/console/src/App.tsx
+index f24c29e..7320271 100644
+--- a/console/src/App.tsx
++++ b/console/src/App.tsx
+@@ -24,6 +24,7 @@ import { languageApi } from "./api/modules/language";
+ import { getApiUrl, getApiToken, clearAuthToken } from "./api/config";
+ import "./styles/layout.css";
+ import "./styles/form-override.css";
++import { isRippleDesktop } from "./config/product";
+ 
+ const antdLocaleMap: Record<string, Locale> = {
+   zh: zhCN,
+@@ -162,7 +163,8 @@ function AppInner() {
+             ? antdTheme.darkAlgorithm
+             : antdTheme.defaultAlgorithm,
+           token: {
+-            colorPrimary: "#FF7F16",
++            /* Ripple: teal accent (water motif); CoPaw: default orange */
++            colorPrimary: isRippleDesktop ? "#0d9488" : "#FF7F16",
+           },
+         }}
+       >
+diff --git a/console/src/config/product.ts b/console/src/config/product.ts
+new file mode 100644
+index 0000000..0f2cd4d
+--- /dev/null
++++ b/console/src/config/product.ts
+@@ -0,0 +1,8 @@
++/**
++ * AxiMate Ripple (desktop) vs upstream CoPaw branding.
++ * Enable with VITE_RIPPLE_DESKTOP=1 (see integrations/ripple/desktop-windows).
++ */
++export const isRippleDesktop = import.meta.env.VITE_RIPPLE_DESKTOP === "1";
++
++export const appDisplayName = isRippleDesktop ? "AxiMate Ripple" : "CoPaw";
++export const appShortName = isRippleDesktop ? "Ripple" : "CoPaw";
+diff --git a/console/src/i18n.ts b/console/src/i18n.ts
+index 6fa931b..58b1bc2 100644
+--- a/console/src/i18n.ts
++++ b/console/src/i18n.ts
+@@ -28,4 +28,33 @@ i18n.use(initReactI18next).init({
+   },
+ });
+ 
++/** AxiMate Ripple — override visible product strings when building desktop SKU */
++if (import.meta.env.VITE_RIPPLE_DESKTOP === "1") {
++  const rippleBundles: Record<string, Record<string, unknown>> = {
++    en: {
++      login: { title: "Sign in to AxiMate Ripple" },
++      chat: {
++        welcomeTextPlaceholder:
++          "e.g. Hello! I'm AxiMate Ripple. How can I help you?",
++      },
++    },
++    zh: {
++      login: { title: "登录 AxiMate Ripple" },
++      chat: {
++        welcomeTextPlaceholder:
++          "例如：你好！我是 AxiMate Ripple，需要什么帮助？",
++      },
++    },
++    ja: {
++      login: { title: "AxiMate Ripple にログイン" },
++    },
++    ru: {
++      login: { title: "Вход в AxiMate Ripple" },
++    },
++  };
++  for (const [lng, bundle] of Object.entries(rippleBundles)) {
++    i18n.addResourceBundle(lng, "translation", bundle, true, true);
++  }
++}
++
+ export default i18n;
+diff --git a/console/src/layouts/Header.tsx b/console/src/layouts/Header.tsx
+index edea196..c5fc3c5 100644
+--- a/console/src/layouts/Header.tsx
++++ b/console/src/layouts/Header.tsx
+@@ -16,6 +16,7 @@ import {
+   isStableVersion,
+   compareVersions,
+ } from "./constants";
++import { appDisplayName, isRippleDesktop } from "../config/product";
+ import { useTheme } from "../contexts/ThemeContext";
+ import { useState, useEffect } from "react";
+ import ReactMarkdown from "react-markdown";
+@@ -159,9 +160,12 @@ export default function Header() {
+                 ? `${import.meta.env.BASE_URL}dark-logo.png`
+                 : `${import.meta.env.BASE_URL}logo.png`
+             }
+-            alt="CoPaw"
++            alt={appDisplayName}
+             className={styles.logoImg}
+           />
++          {isRippleDesktop && (
++            <span className={styles.productName}>{appDisplayName}</span>
++          )}
+           <div className={styles.logoDivider} />
+           {version && (
+             <Badge
+diff --git a/console/src/layouts/index.module.less b/console/src/layouts/index.module.less
+index a5aa1a8..bec7493 100644
+--- a/console/src/layouts/index.module.less
++++ b/console/src/layouts/index.module.less
+@@ -248,6 +248,15 @@
+   width: auto;
+ }
+ 
++.productName {
++  margin-left: 10px;
++  font-size: 15px;
++  font-weight: 600;
++  color: #1a1716;
++  letter-spacing: -0.02em;
++  white-space: nowrap;
++}
++
+ .logoDivider {
+   width: 16px;
+   height: 0px;
+@@ -565,6 +574,10 @@
+     color: rgba(255, 255, 255, 0.85);
+   }
+ 
++  .productName {
++    color: rgba(255, 255, 255, 0.9);
++  }
++
+   .sider {
+     background: #1a1a1a !important;
+     border-right-color: rgba(255, 255, 255, 0.08) !important;
+diff --git a/console/src/main.tsx b/console/src/main.tsx
+index f1220b3..cb97895 100644
+--- a/console/src/main.tsx
++++ b/console/src/main.tsx
+@@ -1,6 +1,15 @@
+ import { createRoot } from "react-dom/client";
+ import App from "./App.tsx";
+ import "./i18n";
++import { isRippleDesktop, appDisplayName } from "./config/product";
++
++if (typeof document !== "undefined") {
++  if (isRippleDesktop) {
++    document.title = `${appDisplayName}`;
++    document.body.classList.add("ripple-desktop");
++    document.documentElement.classList.add("ripple-desktop");
++  }
++}
+ 
+ if (typeof window !== "undefined") {
+   const originalError = console.error;
+@@ -27,4 +36,6 @@ if (typeof window !== "undefined") {
+   };
+ }
+ 
++import "./styles/ripple-desktop.css";
++
+ createRoot(document.getElementById("root")!).render(<App />);
+diff --git a/console/src/styles/ripple-desktop.css b/console/src/styles/ripple-desktop.css
+new file mode 100644
+index 0000000..b5ed41f
+--- /dev/null
++++ b/console/src/styles/ripple-desktop.css
+@@ -0,0 +1,37 @@
++/**
++ * AxiMate Ripple — Windows-first desktop shell (active when html.ripple-desktop).
++ */
++html.ripple-desktop,
++html.ripple-desktop body {
++  /* Segoe UI Variable ships on Windows 10+ */
++  font-family:
++    "Segoe UI Variable",
++    "Segoe UI",
++    system-ui,
++    -apple-system,
++    sans-serif;
++  -webkit-font-smoothing: antialiased;
++  text-rendering: optimizeLegibility;
++}
++
++/* Scrollbars: closer to Win11 fluent feel in WebView2 / Electron */
++html.ripple-desktop * {
++  scrollbar-width: thin;
++  scrollbar-color: rgba(120, 120, 120, 0.45) transparent;
++}
++
++html.ripple-desktop *::-webkit-scrollbar {
++  width: 10px;
++  height: 10px;
++}
++
++html.ripple-desktop *::-webkit-scrollbar-thumb {
++  background-color: rgba(120, 120, 120, 0.45);
++  border-radius: 8px;
++  border: 2px solid transparent;
++  background-clip: padding-box;
++}
++
++html.ripple-desktop *::-webkit-scrollbar-thumb:hover {
++  background-color: rgba(90, 90, 90, 0.55);
++}
+diff --git a/console/src/vite-env.d.ts b/console/src/vite-env.d.ts
+index a4eeaf2..d37f2ba 100644
+--- a/console/src/vite-env.d.ts
++++ b/console/src/vite-env.d.ts
+@@ -1,5 +1,10 @@
+ /// <reference types="vite/client" />
+ 
++interface ImportMetaEnv {
++  /** Set to "1" for AxiMate Ripple desktop branding (Windows product build). */
++  readonly VITE_RIPPLE_DESKTOP?: string;
++}
++
+ declare module "dayjs" {
+   interface Dayjs {
+     fromNow(withoutSuffix?: boolean): string;

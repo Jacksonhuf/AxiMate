@@ -74,6 +74,13 @@ copaw app
 
 Worker 模式与单机 CoPaw 目录不同，**Skills/MCP 思路可复用**。
 
+## Windows 桌面版 Console UI（品牌化）
+
+Ripple 定位为 **桌面产品** 时，对 CoPaw **Web Console** 的 Windows 优先 UI 与 **AxiMate Ripple** 文案由本仓库维护：
+
+- 说明与脚本：**[`integrations/ripple/desktop-windows/README.md`](../integrations/ripple/desktop-windows/README.md)**
+- 对上游的差异：**`integrations/ripple/desktop-windows/patches/001-ripple-windows-ui.patch`**（构建时设置 **`VITE_RIPPLE_DESKTOP=1`**）
+
 ## 许可证
 
 CoPaw 为 **Apache-2.0**；发版时在 SBOM 锁定版本并保留 NOTICE，见 `docs/COMPLIANCE-APACHE2.md`。

@@ -10,6 +10,7 @@
 | 路径 | 说明 |
 |------|------|
 | [`extensions/`](extensions/README.md) | AxiMate 自有的 skill 模板、脚本或说明（需按 CoPaw working dir 配置同步到运行环境） |
+| [`desktop-windows/`](desktop-windows/README.md) | **Windows 桌面** Console：Ripple 品牌化 UI、patch 与 `bootstrap` / `dev` / `build` 脚本 |
 
 ## 开发指引
 

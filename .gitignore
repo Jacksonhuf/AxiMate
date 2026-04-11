@@ -46,3 +46,6 @@ temp/
 
 # Local deploy overrides (may contain host hints; keep optional secrets out of git)
 deploy/scripts/deploy.config.ps1
+
+# Upstream CoPaw clone for Ripple UI work (tracked patches live under integrations/ripple/desktop-windows/patches/)
+integrations/ripple/copaw/

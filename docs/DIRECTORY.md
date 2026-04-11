@@ -42,6 +42,9 @@ AxiMate/
 │   │   └── README.md
 │   └── ripple/                   # AxiMate Ripple（CoPaw）— 当前优先扩展
 │       ├── README.md
+│       ├── desktop-windows/      # Windows Console UI：patch + PowerShell 脚本
+│       │   ├── patches/
+│       │   └── scripts/
 │       └── extensions/
 │           └── README.md
 ├── deploy/                       # 云上安装 HiClaw（含 Higress）
