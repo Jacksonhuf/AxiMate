@@ -1,0 +1,8 @@
+AxiMate
+Copyright 2026 AxiMate Contributors
+
+This product includes software developed as part of the AxiMate project.
+
+Third-party open-source components (for example Higress, orchestration, and
+worker runtimes) are subject to their respective licenses. See docs/COMPLIANCE-APACHE2.md
+and the Software Bill of Materials (SBOM) published with each release.
