@@ -1,66 +1,53 @@
 # Deploy scripts
 
-Defaults target **AlmaLinux 9** (dnf, firewalld) and the public repo  
-[https://github.com/Jacksonhuf/AxiMate.git](https://github.com/Jacksonhuf/AxiMate.git).  
-Override with environment variables or PowerShell parameters.
+Defaults target **AlmaLinux 9** (dnf, firewalld) and clone  
+[https://github.com/Jacksonhuf/AxiMate.git](https://github.com/Jacksonhuf/AxiMate.git) for **scripts + `deploy/.env`**.
+
+The server runtime is **native upstream [HiClaw](https://github.com/alibaba/hiclaw)** (includes **Higress**; **CoPaw** as Worker runtime). Not a custom Nginx/Python stack.
 
 | Script | Where it runs | Purpose |
 |--------|----------------|---------|
-| `bootstrap-server.sh` | Cloud server (root) | Install Docker + Compose, clone/pull repo, create `deploy/.env`, `docker compose up` |
-| `update-stack.sh` | Cloud server | `git pull --ff-only` + rebuild/restart stack |
-| `deploy-remote.ps1` | Your Windows PC | Pipes the shell script over **SSH** (no separate SCP step) |
-| `deploy-remote.sh` | Linux/macOS laptop | Same as above using OpenSSH client |
+| `bootstrap-server.sh` | Cloud server (root) | Docker + git clone/pull AxiMate, load `deploy/.env`, run `deploy/native/install-hiclaw.sh` |
+| `update-stack.sh` | Cloud server | `git pull` + re-run HiClaw installer (upgrade) |
+| `deploy-remote.ps1` | Windows | Pipe shell script over SSH |
+| `deploy-remote.sh` | Linux/macOS | Same |
 
-## Windows (from repo root)
+## Windows
 
-By default **deploy-remote.ps1** uses **`%USERPROFILE%\.ssh\id_ed25519`** when that file exists (same as `Join-Path $env:USERPROFILE '.ssh\id_ed25519'`). Override with `-SshKey "D:\path\to\key"` if needed.
+Default SSH key: `%USERPROFILE%\.ssh\id_ed25519` when the file exists.
 
-First time on a fresh VM:
+**First time**
 
 ```powershell
+# Edit deploy\.env.example locally, commit is optional; on server cp .env.example .env and set HICLAW_LLM_API_KEY
 .\deploy\scripts\deploy-remote.ps1 -Bootstrap
 ```
 
-Later updates (after `git push`):
+**Upgrade (after git push)**
 
 ```powershell
 .\deploy\scripts\deploy-remote.ps1
 ```
 
-Optional: copy `deploy.config.example.ps1` to `deploy.config.ps1` (gitignored), edit host/user/key, then:
+## Server-only
 
-```powershell
-. .\deploy\scripts\deploy.config.ps1
-.\deploy\scripts\deploy-remote.ps1
-```
-
-## Server-only (SSH session on the VM)
+After pushing this repo to GitHub:
 
 ```bash
 export AXIMATE_GIT_URL='https://github.com/Jacksonhuf/AxiMate.git'
 export AXIMATE_DEPLOY_DIR=/opt/aximate
-curl -fsSL https://raw.githubusercontent.com/Jacksonhuf/AxiMate/main/deploy/scripts/bootstrap-server.sh | bash
-```
-
-(Only works after you have pushed `main` to GitHub; otherwise `scp` the script or clone the repo first.)
-
-Or after cloning manually:
-
-```bash
-sudo bash deploy/scripts/bootstrap-server.sh
-sudo bash deploy/scripts/update-stack.sh
+sudo bash /opt/aximate/deploy/scripts/bootstrap-server.sh
 ```
 
 ## Environment variables
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `AXIMATE_GIT_URL` | `https://github.com/Jacksonhuf/AxiMate.git` | Clone/pull URL (use token in URL for private repos — do not log) |
-| `AXIMATE_DEPLOY_DIR` | `/opt/aximate` | Install path on server |
-| `AXIMATE_SSH_KEY` | *(unset)*; if unset and `~/.ssh/id_ed25519` exists, **deploy-remote.sh** uses it | Identity file for `ssh -i` (Linux/macOS script only) |
+| `AXIMATE_GIT_URL` | `https://github.com/Jacksonhuf/AxiMate.git` | This repo (scripts) |
+| `AXIMATE_DEPLOY_DIR` | `/opt/aximate` | Clone path |
+| `AXIMATE_SSH_KEY` | *(Linux script)* `~/.ssh/id_ed25519` if present | `ssh -i` |
+| `HICLAW_*` | see `deploy/.env.example` | Passed through to [HiClaw installer](https://raw.githubusercontent.com/alibaba/hiclaw/main/install/hiclaw-install.sh) |
 
 ## Security
 
-- Use **SSH keys**, not passwords in scripts.
-- Do **not** commit GitHub tokens or production secrets; keep them in server `deploy/.env` only.
-- Your server IP and root user appear only as **defaults** you can override; restrict SSH (`AllowUsers`, firewall, key-only auth) on the VM.
+SSH keys only; put `HICLAW_LLM_API_KEY` in server `deploy/.env`, never commit it.

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# First-time setup on AlmaLinux / RHEL-family (run as root over SSH).
-# Defaults match project docs; override with environment variables.
+# First-time setup on AlmaLinux / RHEL-family (run as root).
+# Stops legacy AxiMate demo containers, clones this repo for scripts/env, then runs native HiClaw install.
+# HiClaw upstream bundles Higress + orchestration; CoPaw is available as a Worker runtime inside HiClaw.
 set -euo pipefail
 
 : "${AXIMATE_GIT_URL:=https://github.com/Jacksonhuf/AxiMate.git}"
@@ -40,20 +41,43 @@ fi
 
 if [[ ! -f "$AXIMATE_DEPLOY_DIR/deploy/.env" ]]; then
   cp "$AXIMATE_DEPLOY_DIR/deploy/.env.example" "$AXIMATE_DEPLOY_DIR/deploy/.env"
-  log "Created deploy/.env from example — edit AXIMATE_PUBLIC_HOST and secrets, then re-run update-stack.sh"
+  log "Created deploy/.env — set HICLAW_LLM_API_KEY (and optional vars), then re-run this script."
+  exit 2
 fi
 
-if systemctl is-active firewalld >/dev/null 2>&1; then
-  if firewall-cmd --state >/dev/null 2>&1; then
-    log "Opening http service in firewalld (if not already)..."
-    firewall-cmd --permanent --add-service=http >/dev/null 2>&1 || true
-    firewall-cmd --reload >/dev/null 2>&1 || true
+# Legacy demo stack (removed from repo): shut down if still present on the host
+if [[ -f "$AXIMATE_DEPLOY_DIR/deploy/docker-compose.yml" ]]; then
+  log "Stopping legacy AxiMate docker-compose stack (if running)..."
+  (cd "$AXIMATE_DEPLOY_DIR" && docker compose -f deploy/docker-compose.yml down --remove-orphans 2>/dev/null) || true
+fi
+
+set -a
+# shellcheck disable=SC1091
+source "$AXIMATE_DEPLOY_DIR/deploy/.env"
+set +a
+
+if [[ "${HICLAW_NON_INTERACTIVE:-0}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
+  log "HICLAW_NON_INTERACTIVE=1 but HICLAW_LLM_API_KEY is empty. Edit $AXIMATE_DEPLOY_DIR/deploy/.env"
+  exit 3
+fi
+
+open_hiclaw_ports() {
+  if ! systemctl is-active firewalld >/dev/null 2>&1; then
+    return 0
   fi
-fi
+  if ! firewall-cmd --state >/dev/null 2>&1; then
+    return 0
+  fi
+  log "Opening HiClaw-related ports in firewalld (adjust if you use custom HICLAW_PORT_*)..."
+  for p in "${HICLAW_PORT_GATEWAY:-18080}" "${HICLAW_PORT_CONSOLE:-18001}" "${HICLAW_PORT_ELEMENT_WEB:-18088}" "${HICLAW_PORT_MANAGER_CONSOLE:-18888}" 8443; do
+    firewall-cmd --permanent --add-port="${p}/tcp" >/dev/null 2>&1 || true
+  done
+  firewall-cmd --reload >/dev/null 2>&1 || true
+}
 
-cd "$AXIMATE_DEPLOY_DIR"
-log "Building and starting stack..."
-docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
-docker compose -f deploy/docker-compose.yml ps
+open_hiclaw_ports
 
-log "Done. Health: curl -s http://127.0.0.1/healthz"
+log "Starting native HiClaw (upstream) installer — includes Higress; use CoPaw Workers from HiClaw UI..."
+bash "$AXIMATE_DEPLOY_DIR/deploy/native/install-hiclaw.sh"
+
+log "Done. Open Element Web at http://127.0.0.1:${HICLAW_PORT_ELEMENT_WEB:-18088} (or your server IP). Higress console: port ${HICLAW_PORT_CONSOLE:-18001}."

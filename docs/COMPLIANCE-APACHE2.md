@@ -4,13 +4,17 @@
 
 **目的**：规范 AxiMate 对基于阿里云原生生态的**上游开源组件**的引入、开发、构建与分发行为，确保对 **Apache License 2.0**（Apache-2.0）的**可追溯遵从**，降低合规与品牌风险。
 
+**产品声明**：AxiMate 基于原生开源项目 **Higress**、**HiClaw**、**CoPaw** 开发；此三者为 **Apache-2.0** 许可的上游基础（具体以各项目官方仓库及发布物中的 `LICENSE` 为准，发版前须再次核对）。
+
 **适用范围**：
 
-- **Gateway 层**（基于 Higress）
-- **Orchestrator 层**（基于 HiClaw）
-- **Worker 层**（基于 CoPaw / ClawWorker 等 MCP 技能运行时）
+- **Gateway 层**（基于 **Higress**，Apache-2.0）
+- **Orchestrator 层**（基于 **HiClaw**，Apache-2.0）
+- **Worker 层**（基于 **CoPaw**，Apache-2.0）
 
 以及上述组件所**随附或捆绑分发**的依赖（含传递依赖中以 Apache-2.0 或需一并声明的其他许可证授权的软件）。
+
+**部署说明**：AxiMate 云部署通过官方 **HiClaw** 安装脚本拉取上游镜像与配置；不在本仓库中重打包 Higress / HiClaw / CoPaw 二进制。再分发义务以实际交付物（镜像列表、随附 `LICENSE`/`NOTICE`）为准。
 
 **前提**：各上游主组件以各仓库 `LICENSE` 及发布物为准；若实际许可证与 Apache-2.0 不一致，以**实际许可证**为准并更新本文档与 SBOM。
 
@@ -88,6 +92,8 @@
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | 0.1 | 2026-04-11 | 初稿，与仓库启动同步 |
+| 0.2 | 2026-04-11 | 明确上游基础为 Higress、HiClaw、CoPaw（Apache-2.0 声明与核对要求） |
+| 0.3 | 2026-04-11 | 云部署改为官方 HiClaw 安装脚本；不再随仓分发自研网关/编排/Worker 镜像 |
 
 ---
 

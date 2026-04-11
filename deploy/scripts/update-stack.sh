@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Idempotent redeploy: git pull + docker compose up --build.
-# Run on the server (manually, cron, or CI SSH). Default deploy dir: /opt/aximate
+# Pull AxiMate deploy scripts + re-run upstream HiClaw installer (upgrade path per HiClaw docs).
 set -euo pipefail
 
 : "${AXIMATE_DEPLOY_DIR:=/opt/aximate}"
@@ -15,8 +14,18 @@ git pull --ff-only
 
 if [[ ! -f deploy/.env ]]; then
   cp deploy/.env.example deploy/.env
-  printf 'Created deploy/.env from example — review before production.\n' >&2
+  printf 'Created deploy/.env from example — set HICLAW_LLM_API_KEY before non-interactive install.\n' >&2
+  exit 2
 fi
 
-docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
-docker compose -f deploy/docker-compose.yml ps
+set -a
+# shellcheck disable=SC1091
+source deploy/.env
+set +a
+
+if [[ "${HICLAW_NON_INTERACTIVE:-0}" == "1" ]] && [[ -z "${HICLAW_LLM_API_KEY:-}" ]]; then
+  echo "HICLAW_LLM_API_KEY is required when HICLAW_NON_INTERACTIVE=1" >&2
+  exit 3
+fi
+
+bash deploy/native/install-hiclaw.sh

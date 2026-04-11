@@ -1,47 +1,48 @@
 # AxiMate 架构
 
-## 三层职责
+## 产品定位与上游基础
+
+**AxiMate** 建立在原生开源项目 **Higress**、**HiClaw**、**CoPaw** 之上：
+
+- **Higress**：由 **HiClaw 官方安装流程**一并部署为 AI Gateway（流量、MCP、凭据隔离等）。
+- **HiClaw**：多 Agent 编排与协作运行时（Manager / Workers、Matrix、MinIO 等）。
+- **CoPaw**：在 HiClaw 中作为 **Worker 运行时** 选用（轻量 Worker）；非本仓库内自研 Python Worker 容器。
+
+三者均为 **Apache-2.0**（以各仓库及发布物 `LICENSE` 为准；发版时用 SBOM 锁定版本并复核）。
+
+## 逻辑分层（与上游对应关系）
 
 ```text
-Client / Model consumers
+用户 / 客户端（如 Element Web）
         │
         ▼
 ┌───────────────────────────────────┐
-│  AxiMate Gateway (Higress)        │
-│  鉴权 · AI Proxy · 多模型路由     │
-│  Wasm 插件（策略、审计、限流等）   │
-└───────────────────────────────────┘
-        │ gRPC / REST
-        ▼
-┌───────────────────────────────────┐
-│  AxiMate Orchestrator (HiClaw)    │
-│  任务拆解 · Multi-Agent · 状态     │
-└───────────────────────────────────┘
-        │ gRPC / REST / MCP client
-        ▼
-┌───────────────────────────────────┐
-│  AxiMate Worker (MCP skills)        │
-│  具体 Tool/Skill 执行               │
+│  HiClaw 平台（上游）                │
+│  · Higress AI Gateway             │
+│  · Manager / Workers（含 CoPaw 等） │
+│  · Matrix / MinIO / …             │
 └───────────────────────────────────┘
 ```
 
+本仓库 **不再** 通过自建 Nginx + 自研编排 + 自研 Worker 的 Compose 模拟上述能力；云上部署请走 **`deploy/` 中的 HiClaw 原生安装脚本**。
+
 ## 通信约定
 
-- 服务间优先 **gRPC** 或 **REST**。
-- Worker 能力以 **MCP（Model Context Protocol）** 暴露，便于统一工具发现与调用，并与网关侧代理策略对齐。
+- 服务间扩展时优先 **gRPC** 或 **REST**。
+- 工具与模型侧能力与 **MCP**、Higress 网关策略对齐（参见 HiClaw / Higress 文档）。
 
-## 技术栈（约束）
+## 技术栈（产品扩展）
 
-| 区域 | 首选语言 / 框架 |
-|------|-----------------|
-| Gateway 扩展 | Go（Higress / Envoy Wasm） |
-| Orchestrator | Python（与 HiClaw / Agent 生态对齐） |
-| Worker | Python 或 Go；对外协议 MCP |
-| 控制台 / 门户 | React + Ant Design |
+| 区域 | 说明 |
+|------|------|
+| 网关与 AI 代理 | 上游 **Higress**（随 HiClaw 部署） |
+| 编排 | 上游 **HiClaw** |
+| Worker 运行时 | 上游 **CoPaw**（在 HiClaw 内配置） |
+| 自有控制台 / 门户 | 规划 **React + Ant Design**（本仓库尚未实现） |
 
 ## 仓库组织（Monorepo）
 
-Gateway、Orchestrator、Worker 作为**同一仓库**中的目录协同演进（见根目录 `README.md` 中 **Monorepo development model**）。上游开源组件以依赖或独立 Fork 形式对齐版本；除非团队与发布节奏需要，暂不拆成三个独立业务仓库。
+本仓存放文档、合规与 **部署自动化**；运行时镜像与安装逻辑来自 **HiClaw 官方安装脚本** 及上游镜像仓库。
 
 ## 与合规文档的关系
 

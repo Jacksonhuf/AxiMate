@@ -1,68 +1,57 @@
 # AxiMate
 
-Enterprise-oriented AI agent platform built on Alibaba cloud-native open-source
-components: **Gateway** (Higress), **Orchestrator** (HiClaw), **Worker**
-(CoPaw / ClawWorker-style MCP skills).
+Enterprise-oriented AI agent platform. **AxiMate is built on the native open-source
+stack: [Higress](https://github.com/alibaba/higress) (gateway), [HiClaw](https://github.com/alibaba/hiclaw)
+(orchestration / multi-agent runtime), and [CoPaw](https://github.com/agentscope-ai/CoPaw)
+(worker runtime inside HiClaw).** Each upstream is **Apache License 2.0** — confirm
+wording in every release SBOM and each project’s `LICENSE`.
+
+| Concern | Upstream | Notes |
+|---------|----------|--------|
+| Gateway | **Higress** | Bundled by HiClaw installer as “Higress AI Gateway” |
+| Orchestration | **HiClaw** | Manager–Workers, Matrix, MinIO, etc. |
+| Worker engine | **CoPaw** | Choose CoPaw as a Worker type in HiClaw (see HiClaw docs) |
+
+This repository holds **product documentation, compliance notes, and deployment glue**
+that invoke the **official HiClaw install script** on your server. It does **not**
+vendor or replace those upstreams.
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
-| `gateway/` | Higress integration, Wasm plugins, AI proxy routing |
-| `orchestrator/` | Task decomposition, multi-agent coordination, state |
-| `worker/` | Tool and skill execution via Model Context Protocol (MCP) |
-| `docs/` | Architecture and license compliance |
+| `deploy/` | Server bootstrap, `.env` template, SSH helpers, native HiClaw installer wrapper |
+| `deploy/native/` | Thin script: downloads and runs upstream `hiclaw-install.sh` |
+| `docs/` | Architecture and Apache-2.0 compliance planning |
 
 ## Monorepo development model
 
-AxiMate is developed as **one repository** with three logical components (`gateway/`,
-`orchestrator/`, `worker/`). This keeps a single **product** and **release story**,
-simplifies cross-layer API changes, and centralizes compliance artifacts (`LICENSE`,
-`NOTICE`, `docs/COMPLIANCE-APACHE2.md`).
-
-**Guidelines**
-
-- Prefer changes in this repo for first-party Gateway/Orchestrator/Worker code.
-- Treat **upstream** projects (Higress, HiClaw, and similar) as **dependencies or
-  forks** with pinned versions recorded in release notes and SBOM—not necessarily
-  vendored into this tree unless you maintain a fork.
-- If a layer later needs its own lifecycle (separate team or cadence), split that
-  component into its own repository **only after** stabilizing public APIs and
-  documenting version compatibility.
+Single Git repo for **AxiMate branding, docs, and deployment automation**. Runtime
+binaries and containers come from **HiClaw / Higress / CoPaw** images and installers,
+pinned by `HICLAW_VERSION` (and related env vars) in `deploy/.env`.
 
 ## Principles
 
-- Prefer **gRPC** or **REST** between services.
-- Worker capabilities are exposed through **MCP** for consistent tool discovery.
-- Upstream Apache-2.0 obligations are tracked in `docs/COMPLIANCE-APACHE2.md`.
+- Prefer **gRPC** or **REST** between services where you extend the stack.
+- **MCP** for tools remains aligned with Higress + HiClaw patterns.
+- Apache-2.0 obligations: `docs/COMPLIANCE-APACHE2.md`.
 
-## Quick start (development)
+## Cloud deployment
 
-Use a **dedicated virtual environment** for AxiMate (for example `python -m venv .venv`
-in `orchestrator/` and `worker/` separately). The Worker pulls `mcp`, which may upgrade
-`anyio` / `starlette` and conflict with other global packages such as older FastAPI.
+Native stack on a VM (AlmaLinux, etc.):
 
-Each component has its own README. Typical flow:
+1. Copy `deploy/.env.example` → `deploy/.env` and set **`HICLAW_LLM_API_KEY`** (when `HICLAW_NON_INTERACTIVE=1`).
+2. Run **`deploy/scripts/bootstrap-server.sh`** on the server (or `deploy-remote.ps1 -Bootstrap` from Windows).
 
-1. **Orchestrator**: Python virtualenv, `pip install -e ./orchestrator[dev]`, run the CLI entry point described in `orchestrator/README.md`.
-2. **Worker**: `pip install -e ./worker[dev]`, run the MCP host as described in `worker/README.md`.
-3. **Gateway**: Follow `gateway/README.md` for Higress/Wasm build and deployment.
+Details, ports, and upgrades: **`deploy/README.md`**.
 
-## Cloud deployment (Docker Compose)
-
-For a **three-container** demo on a cloud VM (Nginx + orchestrator + worker HTTP), see **`deploy/README.md`**.
-
-```bash
-cd deploy && cp .env.example .env && docker compose up -d --build
-```
-
-**Automated SSH deploy** (Windows → AlmaLinux): see `deploy/scripts/README.md` and `deploy-remote.ps1 -Bootstrap`.
+**Automated SSH deploy:** `deploy/scripts/README.md` and `deploy-remote.ps1`.
 
 ## Compliance
 
-This repository ships with `LICENSE` and `NOTICE`. Before any release, complete
-the checklist in `docs/COMPLIANCE-APACHE2.md` and attach an updated SBOM.
+`LICENSE` and `NOTICE` cover AxiMate-authored files in this repo. Upstream
+components carry their own notices — see SBOM per release.
 
 ## Disclaimer
 
-Compliance guidance in `docs/` is operational documentation, not legal advice.
+Compliance text in `docs/` is operational guidance, not legal advice.
