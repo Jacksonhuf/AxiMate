@@ -42,7 +42,8 @@ AxiMate/
 │   │   └── README.md
 │   └── ripple/                   # AxiMate Ripple（CoPaw）— 当前优先扩展
 │       ├── README.md
-│       ├── desktop-windows/      # Windows Console UI：patch + PowerShell 脚本
+│       ├── desktop-windows/      # Windows Console UI：patch、ROADMAP.md、PowerShell 脚本
+│       │   ├── ROADMAP.md        # 桌面版分阶段 To-Do（阶段 0～4）
 │       │   ├── patches/
 │       │   └── scripts/
 │       └── extensions/
