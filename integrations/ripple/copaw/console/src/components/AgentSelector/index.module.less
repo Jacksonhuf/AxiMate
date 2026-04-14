@@ -1,0 +1,383 @@
+// ─── Header (top bar, right side) ─────────────────────────────────────────────
+.agentSelectorHeader {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.agentCountBadge {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.headerSelectedLabel {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+
+.headerSelectedLabelText {
+  font-weight: 600;
+  font-size: 13px;
+  color: #164E63;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+.managementLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0891B2;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+
+  &:hover {
+    color: #0E7490;
+  }
+}
+
+// ─── Select in header ─────────────────────────────────────────────────────────
+.agentSelectorHeaderSelect {
+  min-width: 132px;
+  max-width: 220px;
+
+  :global {
+    .copaw-select-selector,
+    .ant-select-selector {
+      border: 1px solid rgba(8, 145, 178, 0.22) !important;
+      background: #ecfeff !important;
+      box-shadow: none !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      font-size: 13px;
+      font-weight: normal;
+      border-radius: 10px !important;
+      transition: all 0.2s ease;
+      padding-inline: 10px !important;
+      display: flex !important;
+      align-items: center !important;
+
+      &:hover {
+        border-color: rgba(8, 145, 178, 0.45) !important;
+        background: #cffafe !important;
+      }
+    }
+
+    .ant-select-selection-item {
+      padding: 0 !important;
+      line-height: 1.3 !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .ant-select-arrow {
+      color: rgba(22, 78, 99, 0.55);
+      right: 10px;
+
+      .ant-select-suffix {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .ant-select-focused .copaw-select-selector,
+    .ant-select-focused .ant-select-selector {
+      border-color: rgba(8, 145, 178, 0.55) !important;
+      box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.12) !important;
+    }
+  }
+}
+
+// ─── Dropdown Header ─────────────────────────────────────────────────────────
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid rgba(26, 23, 22, 0.06);
+  margin-bottom: 2px;
+}
+
+.dropdownHeaderTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+// ─── Dropdown ─────────────────────────────────────────────────────────────────
+.agentSelectorDropdown {
+  border-radius: 12px !important;
+  overflow: hidden;
+  min-width: 260px !important;
+  border: 1px solid rgba(26, 23, 22, 0.06) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  :global {
+    .copaw-select-item {
+      padding: 0 !important;
+      border-radius: 8px;
+      margin: 3px 6px;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background: rgba(8, 145, 178, 0.08) !important;
+      }
+
+      &.copaw-select-item-option-selected {
+        background: rgba(8, 145, 178, 0.08) !important;
+
+        .agentOptionIcon {
+          background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+          border-color: transparent;
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        }
+      }
+    }
+
+    .ant-select-item {
+      padding: 0 !important;
+      border-radius: 8px;
+      margin: 3px 6px;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background: rgba(8, 145, 178, 0.08) !important;
+      }
+
+      &.ant-select-item-option-selected {
+        background: rgba(8, 145, 178, 0.08) !important;
+
+        .agentOptionIcon {
+          background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+          border-color: transparent;
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        }
+      }
+    }
+
+    .rc-virtual-list {
+      padding: 6px 0;
+    }
+  }
+}
+
+// ─── Agent Option ─────────────────────────────────────────────────────────────
+.agentOption {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentOptionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agentOptionIcon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+  border: 1px solid rgba(8, 145, 178, 0.15);
+  border-radius: 8px;
+  color: #0891B2;
+  transition: all 0.2s ease;
+
+  .agentOption:hover & {
+    background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+    border-color: rgba(8, 145, 178, 0.3);
+    color: #0891B2;
+    box-shadow: 0 2px 6px rgba(8, 145, 178, 0.15);
+  }
+}
+
+.agentOptionContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agentOptionName {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
+
+  .agentOptionNameText {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.activeIndicator {
+  flex-shrink: 0;
+  color: #0891B2;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.agentOptionDescription {
+  font-size: 11px;
+  color: #8c8c8c;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentOptionId {
+  font-size: 10px;
+  font-family: "SF Mono", "Consolas", "Monaco", monospace;
+  color: rgba(8, 145, 178, 0.45);
+  letter-spacing: 0.3px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(8, 145, 178, 0.08);
+}
+
+// ─── Dark mode overrides ───────────────────────────────────────────────────────
+:global(.dark-mode) {
+  .headerSelectedLabelText {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .agentCountBadge {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .dropdownHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .dropdownHeaderTitle {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .agentSelectorHeaderSelect {
+    :global {
+      .copaw-select-selector,
+      .ant-select-selector {
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+
+        &:hover {
+          border-color: rgba(245, 160, 90, 0.35) !important;
+          background: rgba(255, 255, 255, 0.09) !important;
+        }
+      }
+
+      .ant-select-arrow {
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      .ant-select-focused .copaw-select-selector,
+      .ant-select-focused .ant-select-selector {
+        border-color: rgba(245, 160, 90, 0.45) !important;
+        box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2) !important;
+      }
+    }
+  }
+
+  .managementLink {
+    color: #22D3EE;
+
+    &:hover {
+      color: #0891B2;
+    }
+  }
+
+  .agentSelectorDropdown {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.2) !important;
+
+    :global {
+      .ant-select-item {
+        &:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        &.ant-select-item-option-selected {
+          background: rgba(255, 255, 255, 0.08) !important;
+
+          .agentOptionIcon {
+            background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(8, 145, 178, 0.5);
+          }
+        }
+      }
+    }
+  }
+
+  .agentOptionIcon {
+    background: linear-gradient(
+      135deg,
+      rgba(8, 145, 178, 0.15) 0%,
+      rgba(8, 145, 178, 0.08) 100%
+    );
+    border-color: rgba(245, 160, 90, 0.2);
+    color: #22D3EE;
+
+    .agentOption:hover & {
+      background: linear-gradient(
+        135deg,
+        rgba(8, 145, 178, 0.3) 0%,
+        rgba(8, 145, 178, 0.15) 100%
+      );
+      border-color: rgba(245, 160, 90, 0.4);
+      color: #f5b87a;
+      box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+    }
+  }
+
+  .agentOptionName {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .agentOptionDescription {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .agentOptionId {
+    color: rgba(245, 160, 90, 0.5);
+    border-top-color: rgba(245, 160, 90, 0.12);
+  }
+}

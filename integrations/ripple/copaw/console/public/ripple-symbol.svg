@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Ripple">
+  <title>Ripple</title>
+  <defs>
+    <linearGradient id="bg" x1="22%" y1="18%" x2="86%" y2="92%">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="55%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="128" fill="url(#bg)"/>
+  <circle cx="128" cy="128" r="116" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="6"/>
+  <path
+    d="M 86 188 V 68 h 58 c 30 0 50 18 50 44 0 18-10 32-26 39 16 7 26 20 26 37 0 33-24 50-57 50 Z
+       M 112 92 v 49 h 30 c 18 0 28-9 28-25 0-16-10-24-28-24 Z
+       M 112 162 v 50 h 32 c 21 0 32-9 32-26 0-17-11-24-32-24 Z"
+    fill="rgba(240,253,255,0.96)"
+  />
+</svg>

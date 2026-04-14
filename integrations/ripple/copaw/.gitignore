@@ -1,0 +1,9 @@
+# Local build / tooling (do not commit)
+.cache/
+dist/
+**/node_modules/
+**/__pycache__/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/

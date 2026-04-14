@@ -1,228 +1,2700 @@
-diff --git a/console/index.html b/console/index.html
-index 18049f1..ea6e8a5 100644
+﻿diff --git a/console/index.html b/console/index.html
+index 18049f1..4d7e188 100644
 --- a/console/index.html
 +++ b/console/index.html
-@@ -5,6 +5,7 @@
+@@ -4,7 +4,7 @@
+     <meta charset="UTF-8" />
      <link rel="icon" type="image/svg+xml" href="/copaw-symbol.svg" />
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-     <title>CoPaw Console</title>
-+    <!-- Title overridden at runtime when VITE_RIPPLE_DESKTOP=1 (AxiMate Ripple) -->
+-    <title>CoPaw Console</title>
++    <title>Ripple Console</title>
      <link rel="preconnect" href="https://fonts.googleapis.com" />
      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
      <link
+diff --git a/console/package.json b/console/package.json
+index 8c0500f..b9e21be 100644
+--- a/console/package.json
++++ b/console/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "copaw-console",
++  "name": "ripple-console",
+   "private": true,
+   "version": "0.0.0",
+   "type": "module",
+diff --git a/console/public/assistant-avatar.svg b/console/public/assistant-avatar.svg
+new file mode 100644
+index 0000000..b38001b
+--- /dev/null
++++ b/console/public/assistant-avatar.svg
+@@ -0,0 +1,71 @@
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" role="img" aria-label="Assistant">
++  <title>Assistant</title>
++  <defs>
++    <linearGradient id="av-bg" x1="18%" y1="12%" x2="88%" y2="92%">
++      <stop offset="0%" stop-color="#67e8f9"/>
++      <stop offset="50%" stop-color="#0891b2"/>
++      <stop offset="100%" stop-color="#0e7490"/>
++    </linearGradient>
++    <linearGradient id="av-face" x1="30%" y1="20%" x2="70%" y2="85%">
++      <stop offset="0%" stop-color="#ffffff"/>
++      <stop offset="100%" stop-color="#ecfeff"/>
++    </linearGradient>
++    <filter id="av-soft" x="-20%" y="-20%" width="140%" height="140%">
++      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="b"/>
++      <feOffset dx="0" dy="2" in="b" result="o"/>
++      <feComponentTransfer in="o" result="a">
++        <feFuncA type="linear" slope="0.22"/>
++      </feComponentTransfer>
++      <feMerge>
++        <feMergeNode in="a"/>
++        <feMergeNode in="SourceGraphic"/>
++      </feMerge>
++    </filter>
++  </defs>
++  <circle cx="144" cy="144" r="144" fill="url(#av-bg)"/>
++  <circle
++    cx="144"
++    cy="144"
++    r="132"
++    fill="none"
++    stroke="rgba(255,255,255,0.22)"
++    stroke-width="3"
++  />
++  <g filter="url(#av-soft)">
++    <ellipse cx="144" cy="158" rx="88" ry="76" fill="url(#av-face)"/>
++  </g>
++  <ellipse cx="72" cy="148" rx="22" ry="28" fill="#ffffff" opacity="0.95"/>
++  <ellipse cx="216" cy="148" rx="22" ry="28" fill="#ffffff" opacity="0.95"/>
++  <line
++    x1="144"
++    y1="62"
++    x2="144"
++    y2="96"
++    stroke="#ffffff"
++    stroke-width="8"
++    stroke-linecap="round"
++  />
++  <circle cx="144" cy="52" r="14" fill="#cffafe" stroke="#0891b2" stroke-width="3"/>
++  <ellipse cx="118" cy="150" rx="14" ry="18" fill="#164E63"/>
++  <ellipse cx="170" cy="150" rx="14" ry="18" fill="#164E63"/>
++  <ellipse cx="122" cy="144" rx="5" ry="6" fill="#ffffff" opacity="0.9"/>
++  <ellipse cx="174" cy="144" rx="5" ry="6" fill="#ffffff" opacity="0.9"/>
++  <path
++    d="M 118 182 Q 144 204 170 182"
++    fill="none"
++    stroke="#164E63"
++    stroke-width="6"
++    stroke-linecap="round"
++  />
++  <g transform="translate(198, 168) rotate(-12)">
++    <ellipse cx="0" cy="0" rx="26" ry="22" fill="#ffffff" stroke="#a5f3fc" stroke-width="3"/>
++    <path
++      d="M -8 -6 L -14 -18 M 0 -8 L 0 -22 M 8 -6 L 14 -18"
++      fill="none"
++      stroke="#0891b2"
++      stroke-width="4"
++      stroke-linecap="round"
++    />
++  </g>
++  <circle cx="144" cy="188" r="10" fill="#22d3ee" opacity="0.55"/>
++</svg>
 diff --git a/console/src/App.tsx b/console/src/App.tsx
-index f24c29e..7320271 100644
+index f24c29e..a74c9c1 100644
 --- a/console/src/App.tsx
 +++ b/console/src/App.tsx
 @@ -24,6 +24,7 @@ import { languageApi } from "./api/modules/language";
  import { getApiUrl, getApiToken, clearAuthToken } from "./api/config";
  import "./styles/layout.css";
  import "./styles/form-override.css";
-+import { isRippleDesktop } from "./config/product";
++import { brandColors } from "./constants/brandColors";
  
  const antdLocaleMap: Record<string, Locale> = {
    zh: zhCN,
-@@ -162,7 +163,8 @@ function AppInner() {
+@@ -162,7 +163,21 @@ function AppInner() {
              ? antdTheme.darkAlgorithm
              : antdTheme.defaultAlgorithm,
            token: {
 -            colorPrimary: "#FF7F16",
-+            /* Ripple: teal accent (water motif); CoPaw: default orange */
-+            colorPrimary: isRippleDesktop ? "#0d9488" : "#FF7F16",
++            colorPrimary: brandColors.primary,
++            colorInfo: brandColors.primary,
++            colorLink: brandColors.primaryHover,
++            colorSuccess: brandColors.primary,
++          },
++          components: {
++            Button: {
++              defaultBg: brandColors.surfaceLight,
++              defaultColor: brandColors.textDeep,
++              defaultBorderColor: "rgba(8, 145, 178, 0.35)",
++              defaultHoverBg: brandColors.surfaceLightHover,
++              defaultHoverColor: brandColors.textDeep,
++              defaultHoverBorderColor: brandColors.primary,
++              colorPrimary: brandColors.primary,
++            },
            },
          }}
        >
+diff --git a/console/src/components/AgentSelector/index.module.less b/console/src/components/AgentSelector/index.module.less
+index 675d4a7..fa0a720 100644
+--- a/console/src/components/AgentSelector/index.module.less
++++ b/console/src/components/AgentSelector/index.module.less
+@@ -1,60 +1,30 @@
+-// 鈹€鈹€鈹€ Wrapper 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-.agentSelectorWrapper {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 2px;
+-  padding: 8px 12px;
+-  background: rgba(43, 18, 0, 0.02);
+-  border: 1px solid rgba(26, 23, 22, 0.06);
+-  border-radius: 8px;
+-  box-sizing: border-box;
+-  width: 100%;
+-  transition: all 0.2s ease;
+-  margin-bottom: 12px;
+-}
+-
+-// 鈹€鈹€鈹€ Collapsed (icon only) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-.agentSelectorCollapsed {
+-  width: 40px;
+-  height: 40px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  background: rgba(43, 18, 0, 0.04);
+-  border: 1px solid rgba(26, 23, 22, 0.08);
+-  border-radius: 8px;
+-  color: #f07e26;
+-  cursor: default;
+-  margin-bottom: 12px;
+-  transition: all 0.2s ease;
+-
+-  &:hover {
+-    background: rgba(43, 18, 0, 0.08);
+-    border-color: rgba(240, 126, 38, 0.3);
+-  }
++// 鈹€鈹€鈹€ Header (top bar, right side) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
++.agentSelectorHeader {
++  display: inline-flex;
++  flex-shrink: 0;
+ }
+ 
+-// 鈹€鈹€鈹€ Label 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-.agentSelectorLabel {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 4px;
++.agentCountBadge {
+   font-size: 12px;
+   font-weight: 500;
+   color: rgba(0, 0, 0, 0.4);
+-  white-space: nowrap;
+-  user-select: none;
++}
+ 
+-  svg {
+-    opacity: 0.5;
+-  }
++.headerSelectedLabel {
++  display: flex;
++  align-items: center;
++  min-width: 0;
++  gap: 6px;
+ }
+ 
+-.agentCountBadge {
+-  font-size: 12px;
+-  font-weight: 500;
+-  color: rgba(0, 0, 0, 0.4);
++.headerSelectedLabelText {
++  font-weight: 600;
++  font-size: 13px;
++  color: #164E63;
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++  max-width: 160px;
+ }
+ 
+ .managementLink {
+@@ -63,7 +33,7 @@
+   gap: 2px;
+   font-size: 12px;
+   font-weight: 500;
+-  color: #f07e26;
++  color: #0891B2;
+   background: none;
+   border: none;
+   padding: 0;
+@@ -72,46 +42,47 @@
+   flex-shrink: 0;
+ 
+   &:hover {
+-    color: #d96c18;
++    color: #0E7490;
+   }
+ }
+ 
+-// 鈹€鈹€鈹€ Select Component 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-.agentSelector {
+-  width: 100%;
++// 鈹€鈹€鈹€ Select in header 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
++.agentSelectorHeaderSelect {
++  min-width: 132px;
++  max-width: 220px;
+ 
+   :global {
+-    .copaw-select-selector {
+-      border: none !important;
+-      background: transparent !important;
++    .copaw-select-selector,
++    .ant-select-selector {
++      border: 1px solid rgba(8, 145, 178, 0.22) !important;
++      background: #ecfeff !important;
+       box-shadow: none !important;
+-      height: 32px !important;
++      height: 36px !important;
++      min-height: 36px !important;
+       font-size: 13px;
+       font-weight: normal;
+-      border-radius: 8px !important;
++      border-radius: 10px !important;
+       transition: all 0.2s ease;
+-      padding: 0 !important;
++      padding-inline: 10px !important;
++      display: flex !important;
++      align-items: center !important;
+ 
+       &:hover {
+-        border: none !important;
+-        background: transparent !important;
+-      }
+-
+-      &:focus {
+-        border: none !important;
+-        background: transparent !important;
+-        box-shadow: none !important;
++        border-color: rgba(8, 145, 178, 0.45) !important;
++        background: #cffafe !important;
+       }
+     }
+ 
+     .ant-select-selection-item {
+       padding: 0 !important;
+-      line-height: 22px;
++      line-height: 1.3 !important;
++      display: flex !important;
++      align-items: center !important;
+     }
+ 
+     .ant-select-arrow {
+-      color: rgba(26, 23, 22, 0.35);
+-      right: 8px;
++      color: rgba(22, 78, 99, 0.55);
++      right: 10px;
+ 
+       .ant-select-suffix {
+         display: flex;
+@@ -119,38 +90,14 @@
+       }
+     }
+ 
+-    .ant-select-focused {
+-      .ant-select-selector {
+-        border: none !important;
+-        background: transparent !important;
+-        box-shadow: none !important;
+-      }
++    .ant-select-focused .copaw-select-selector,
++    .ant-select-focused .ant-select-selector {
++      border-color: rgba(8, 145, 178, 0.55) !important;
++      box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.12) !important;
+     }
+   }
+ }
+ 
+-// 鈹€鈹€鈹€ Selected Agent Label 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-.selectedAgentLabel {
+-  display: flex;
+-  align-items: center;
+-  gap: 6px;
+-  color: rgba(0, 0, 0, 0.85);
+-
+-  svg {
+-    flex-shrink: 0;
+-    color: #f07e26;
+-    opacity: 0.85;
+-  }
+-
+-  span {
+-    font-weight: 600;
+-    font-size: 13px;
+-  }
+-}
+-
+-// 鈹€鈹€鈹€ Agent Badge 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+-// (removed - badge is now inline in label)
+-
+ // 鈹€鈹€鈹€ Dropdown Header 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+ .dropdownHeader {
+   display: flex;
+@@ -171,9 +118,7 @@
+ .agentSelectorDropdown {
+   border-radius: 12px !important;
+   overflow: hidden;
+-  min-width: 242px !important;
+-  left: 15px !important;
+-  top: 140px !important;
++  min-width: 260px !important;
+   border: 1px solid rgba(26, 23, 22, 0.06) !important;
+   box-shadow:
+     0 8px 32px rgba(0, 0, 0, 0.12),
+@@ -186,17 +131,17 @@
+       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+ 
+       &:hover {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+       }
+ 
+       &.copaw-select-item-option-selected {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+ 
+         .agentOptionIcon {
+-          background: linear-gradient(135deg, #f07e26 0%, #f5a05a 100%);
++          background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+           border-color: transparent;
+           color: #ffffff;
+-          box-shadow: 0 2px 8px rgba(240, 126, 38, 0.4);
++          box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+         }
+       }
+     }
+@@ -208,17 +153,17 @@
+       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+ 
+       &:hover {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+       }
+ 
+       &.ant-select-item-option-selected {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+ 
+         .agentOptionIcon {
+-          background: linear-gradient(135deg, #f07e26 0%, #f5a05a 100%);
++          background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+           border-color: transparent;
+           color: #ffffff;
+-          box-shadow: 0 2px 8px rgba(240, 126, 38, 0.4);
++          box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+         }
+       }
+     }
+@@ -250,17 +195,17 @@
+   display: flex;
+   align-items: center;
+   justify-content: center;
+-  background: linear-gradient(135deg, #fff8f2 0%, #fff0e5 100%);
+-  border: 1px solid rgba(240, 126, 38, 0.15);
++  background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
++  border: 1px solid rgba(8, 145, 178, 0.15);
+   border-radius: 8px;
+-  color: #f07e26;
++  color: #0891B2;
+   transition: all 0.2s ease;
+ 
+   .agentOption:hover & {
+-    background: linear-gradient(135deg, #ffe9d4 0%, #fff0e5 100%);
+-    border-color: rgba(240, 126, 38, 0.3);
+-    color: #f07e26;
+-    box-shadow: 0 2px 6px rgba(240, 126, 38, 0.15);
++    background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
++    border-color: rgba(8, 145, 178, 0.3);
++    color: #0891B2;
++    box-shadow: 0 2px 6px rgba(8, 145, 178, 0.15);
+   }
+ }
+ 
+@@ -292,7 +237,7 @@
+ 
+ .activeIndicator {
+   flex-shrink: 0;
+-  color: #f07e26;
++  color: #0891B2;
+   animation: fadeIn 0.3s ease;
+ }
+ 
+@@ -319,36 +264,16 @@
+ .agentOptionId {
+   font-size: 10px;
+   font-family: "SF Mono", "Consolas", "Monaco", monospace;
+-  color: rgba(240, 126, 38, 0.45);
++  color: rgba(8, 145, 178, 0.45);
+   letter-spacing: 0.3px;
+   padding-top: 4px;
+-  border-top: 1px solid rgba(240, 126, 38, 0.08);
++  border-top: 1px solid rgba(8, 145, 178, 0.08);
+ }
+ 
+ // 鈹€鈹€鈹€ Dark mode overrides 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+ :global(.dark-mode) {
+-  .agentSelectorWrapper {
+-    background: rgba(255, 255, 255, 0.03);
+-    border-color: rgba(255, 255, 255, 0.08);
+-  }
+-
+-  .agentSelectorCollapsed {
+-    background: rgba(255, 255, 255, 0.05);
+-    border-color: rgba(255, 255, 255, 0.1);
+-    color: #f07e26;
+-
+-    &:hover {
+-      background: rgba(255, 255, 255, 0.08);
+-      border-color: rgba(240, 126, 38, 0.4);
+-    }
+-  }
+-
+-  .agentSelectorLabel {
+-    color: rgba(255, 255, 255, 0.55);
+-
+-    svg {
+-      opacity: 0.7;
+-    }
++  .headerSelectedLabelText {
++    color: rgba(255, 255, 255, 0.9);
+   }
+ 
+   .agentCountBadge {
+@@ -363,21 +288,16 @@
+     color: rgba(255, 255, 255, 0.4);
+   }
+ 
+-  .agentSelector {
++  .agentSelectorHeaderSelect {
+     :global {
++      .copaw-select-selector,
+       .ant-select-selector {
+-        border: none !important;
+-        background: transparent !important;
++        border-color: rgba(255, 255, 255, 0.12) !important;
++        background: rgba(255, 255, 255, 0.06) !important;
+ 
+         &:hover {
+-          border: none !important;
+-          background: transparent !important;
+-        }
+-
+-        &:focus {
+-          border: none !important;
+-          background: transparent !important;
+-          box-shadow: none !important;
++          border-color: rgba(245, 160, 90, 0.35) !important;
++          background: rgba(255, 255, 255, 0.09) !important;
+         }
+       }
+ 
+@@ -385,28 +305,19 @@
+         color: rgba(255, 255, 255, 0.45);
+       }
+ 
++      .ant-select-focused .copaw-select-selector,
+       .ant-select-focused .ant-select-selector {
+-        border: none !important;
+-        background: transparent !important;
+-        box-shadow: none !important;
++        border-color: rgba(245, 160, 90, 0.45) !important;
++        box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2) !important;
+       }
+     }
+   }
+ 
+-  .selectedAgentLabel {
+-    color: rgba(255, 255, 255, 0.9);
+-
+-    svg {
+-      color: #f5a05a;
+-      opacity: 0.9;
+-    }
+-  }
+-
+   .managementLink {
+-    color: #f5a05a;
++    color: #22D3EE;
+ 
+     &:hover {
+-      color: #f07e26;
++      color: #0891B2;
+     }
+   }
+ 
+@@ -426,10 +337,10 @@
+           background: rgba(255, 255, 255, 0.08) !important;
+ 
+           .agentOptionIcon {
+-            background: linear-gradient(135deg, #f07e26 0%, #f5a05a 100%);
++            background: linear-gradient(135deg, #0891B2 0%, #22D3EE 100%);
+             border-color: transparent;
+             color: #ffffff;
+-            box-shadow: 0 2px 8px rgba(240, 126, 38, 0.5);
++            box-shadow: 0 2px 8px rgba(8, 145, 178, 0.5);
+           }
+         }
+       }
+@@ -439,21 +350,21 @@
+   .agentOptionIcon {
+     background: linear-gradient(
+       135deg,
+-      rgba(240, 126, 38, 0.15) 0%,
+-      rgba(240, 126, 38, 0.08) 100%
++      rgba(8, 145, 178, 0.15) 0%,
++      rgba(8, 145, 178, 0.08) 100%
+     );
+     border-color: rgba(245, 160, 90, 0.2);
+-    color: #f5a05a;
++    color: #22D3EE;
+ 
+     .agentOption:hover & {
+       background: linear-gradient(
+         135deg,
+-        rgba(240, 126, 38, 0.3) 0%,
+-        rgba(240, 126, 38, 0.15) 100%
++        rgba(8, 145, 178, 0.3) 0%,
++        rgba(8, 145, 178, 0.15) 100%
+       );
+       border-color: rgba(245, 160, 90, 0.4);
+       color: #f5b87a;
+-      box-shadow: 0 2px 8px rgba(240, 126, 38, 0.3);
++      box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+     }
+   }
+ 
+diff --git a/console/src/components/AgentSelector/index.tsx b/console/src/components/AgentSelector/index.tsx
+index e9fc3f5..34256fc 100644
+--- a/console/src/components/AgentSelector/index.tsx
++++ b/console/src/components/AgentSelector/index.tsx
+@@ -1,6 +1,6 @@
+-import { Select, Tag, Tooltip } from "antd";
++import { Select, Tag } from "antd";
+ import { useEffect, useState } from "react";
+-import { Bot, CheckCircle, EyeOff, ChevronRight } from "lucide-react";
++import { Bot, CheckCircle, ChevronRight } from "lucide-react";
+ import { SparkDownLine, SparkUpLine } from "@agentscope-ai/icons";
+ import { useAgentStore } from "../../stores/agentStore";
+ import { agentsApi } from "../../api/modules/agents";
+@@ -10,13 +10,7 @@ import { useNavigate } from "react-router-dom";
+ import { useAppMessage } from "../../hooks/useAppMessage";
+ import styles from "./index.module.less";
+ 
+-interface AgentSelectorProps {
+-  collapsed?: boolean;
+-}
+-
+-export default function AgentSelector({
+-  collapsed = false,
+-}: AgentSelectorProps) {
++export default function AgentSelector() {
+   const { t } = useTranslation();
+   const navigate = useNavigate();
+   const { selectedAgent, agents, setSelectedAgent, setAgents } =
+@@ -33,7 +27,6 @@ export default function AgentSelector({
+     try {
+       setLoading(true);
+       const data = await agentsApi.listAgents();
+-      // Sort agents: enabled first, disabled last
+       const sortedAgents = [...data.agents].sort((a, b) => {
+         if (a.enabled === b.enabled) return 0;
+         return a.enabled ? -1 : 1;
+@@ -50,7 +43,6 @@ export default function AgentSelector({
+   const handleChange = (value: string) => {
+     const targetAgent = agents?.find((a) => a.id === value);
+ 
+-    // Prevent switching to disabled agent
+     if (targetAgent && !targetAgent.enabled) {
+       message.warning(t("agent.cannotSwitchToDisabled"));
+       return;
+@@ -60,77 +52,53 @@ export default function AgentSelector({
+     message.success(t("agent.switchSuccess"));
+   };
+ 
+-  // Auto-switch to default if the selected agent was deleted or disabled
+   useEffect(() => {
+     if (!agents?.length || selectedAgent === "default") return;
+ 
+     const currentAgent = agents.find((a) => a.id === selectedAgent);
+ 
+     if (!currentAgent) {
+-      // Agent was deleted 鈥?no longer in the list
+       setSelectedAgent("default");
+       message.warning(t("agent.currentAgentDeleted"));
+     } else if (!currentAgent.enabled) {
+-      // Agent exists but was disabled
+       setSelectedAgent("default");
+       message.warning(t("agent.currentAgentDisabled"));
+     }
+   }, [agents, selectedAgent, setSelectedAgent, t]);
+ 
+-  // Count only enabled agents for badge
+   const enabledCount = agents?.filter((a) => a.enabled).length ?? 0;
+   const agentCount = enabledCount;
+ 
+-  const currentAgentInfo = agents?.find((a) => a.id === selectedAgent);
+-
+-  // Collapsed: show just the Bot icon with Tooltip
+-  if (collapsed) {
+-    return (
+-      <Tooltip
+-        title={
+-          currentAgentInfo
+-            ? getAgentDisplayName(currentAgentInfo, t)
+-            : selectedAgent
+-        }
+-        placement="right"
+-        overlayInnerStyle={{ background: "rgba(0,0,0,0.75)", color: "#fff" }}
+-      >
+-        <div className={styles.agentSelectorCollapsed}>
+-          <Bot size={18} strokeWidth={2} />
+-        </div>
+-      </Tooltip>
+-    );
+-  }
+-
+   return (
+-    <div className={styles.agentSelectorWrapper}>
+-      <div className={styles.agentSelectorLabel}>
+-        <span>
+-          {t("agent.currentWorkspace")}
+-          {agentCount > 0 && (
+-            <span className={styles.agentCountBadge}> ({agentCount})</span>
+-          )}
+-        </span>
+-      </div>
++    <div className={styles.agentSelectorHeader}>
+       <Select
+         value={selectedAgent}
+         onChange={handleChange}
+         loading={loading}
+-        className={styles.agentSelector}
++        className={styles.agentSelectorHeaderSelect}
+         placeholder={t("agent.selectAgent")}
+         optionLabelProp="label"
++        placement="bottomRight"
++        popupMatchSelectWidth={false}
+         popupClassName={styles.agentSelectorDropdown}
+         onDropdownVisibleChange={setDropdownOpen}
+         suffixIcon={
+-          dropdownOpen ? <SparkUpLine size={20} /> : <SparkDownLine size={20} />
++          dropdownOpen ? <SparkUpLine size={18} /> : <SparkDownLine size={18} />
+         }
+         dropdownRender={(menu) => (
+           <>
+             <div className={styles.dropdownHeader}>
+               <span className={styles.dropdownHeaderTitle}>
+                 {t("agent.currentWorkspace")}
++                {agentCount > 0 && (
++                  <span className={styles.agentCountBadge}>
++                    {" "}
++                    ({agentCount})
++                  </span>
++                )}
+               </span>
+               <button
++                type="button"
+                 className={styles.managementLink}
+                 onClick={() => navigate("/agents")}
+               >
+@@ -148,10 +116,10 @@ export default function AgentSelector({
+             value={agent.id}
+             disabled={!agent.enabled}
+             label={
+-              <div className={styles.selectedAgentLabel}>
+-                <Bot size={14} strokeWidth={2} />
+-                <span>{getAgentDisplayName(agent, t)}</span>
+-                {!agent.enabled && <EyeOff size={12} strokeWidth={2} />}
++              <div className={styles.headerSelectedLabel}>
++                <span className={styles.headerSelectedLabelText}>
++                  {getAgentDisplayName(agent, t)}
++                </span>
+               </div>
+             }
+           >
+diff --git a/console/src/components/LanguageSwitcher/index.module.less b/console/src/components/LanguageSwitcher/index.module.less
+index dbc2956..2775435 100644
+--- a/console/src/components/LanguageSwitcher/index.module.less
++++ b/console/src/components/LanguageSwitcher/index.module.less
+@@ -12,14 +12,14 @@
+       transition: all 0.2s ease;
+ 
+       &:hover {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+       }
+     }
+ 
+     .copaw-dropdown-menu-item-selected,
+     .ant-dropdown-menu-item-selected {
+       border-radius: 2px !important;
+-      background: rgba(43, 18, 0, 0.03) !important;
++      background: rgba(8, 145, 178, 0.05) !important;
+       color: rgba(26, 23, 22, 0.88) !important;
+     }
+   }
+diff --git a/console/src/components/RippleWordmarkLogo.tsx b/console/src/components/RippleWordmarkLogo.tsx
+new file mode 100644
+index 0000000..e5edeb8
+--- /dev/null
++++ b/console/src/components/RippleWordmarkLogo.tsx
+@@ -0,0 +1,104 @@
++import { useId, type CSSProperties } from "react";
++
++/**
++ * AxiMate Ripple 鈥?bold **A**, stylized **x** (gradient curve), **iMate**, then **Ripple**.
++ */
++export default function RippleWordmarkLogo({
++  isDark,
++  className,
++  style,
++}: {
++  isDark: boolean;
++  className?: string;
++  style?: CSSProperties;
++}) {
++  const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
++  const gradId = `axi-x-grad-${rawId}`;
++
++  const navy = isDark ? "#e2e8f0" : "#164E63";
++  const navyX = isDark ? "#cbd5e1" : "#164E63";
++  const g0 = isDark ? "#67e8f9" : "#CFFAFE";
++  const g1 = isDark ? "#22d3ee" : "#0891B2";
++
++  const mainSize = 23;
++  const rippleSize = 15;
++
++  return (
++    <svg
++      className={className}
++      style={style}
++      viewBox="0 0 168 28"
++      role="img"
++      xmlns="http://www.w3.org/2000/svg"
++      aria-label="Ripple Console"
++    >
++      <title>Ripple Console</title>
++      <defs>
++        <linearGradient
++          id={gradId}
++          gradientUnits="userSpaceOnUse"
++          x1="2.5"
++          y1="13"
++          x2="15.5"
++          y2="3.5"
++        >
++          <stop offset="0%" stopColor={g0} />
++          <stop offset="100%" stopColor={g1} />
++        </linearGradient>
++      </defs>
++
++      <text
++        x="0"
++        y="21.5"
++        fontFamily='system-ui, "Segoe UI", "Segoe UI Variable", sans-serif'
++        fontSize={mainSize}
++        fontWeight="700"
++        letterSpacing="-0.03em"
++        fill={navy}
++      >
++        A
++      </text>
++
++      <g transform="translate(11, 6)">
++        <path
++          d="M 2.5 13 Q 9 8 15.5 3.5"
++          fill="none"
++          stroke={`url(#${gradId})`}
++          strokeWidth="2.1"
++          strokeLinecap="round"
++        />
++        <path
++          d="M 2.5 3.5 Q 9 8.5 15.5 13"
++          fill="none"
++          stroke={navyX}
++          strokeWidth="2.1"
++          strokeLinecap="round"
++        />
++      </g>
++
++      <text
++        x="29"
++        y="21.5"
++        fontFamily='system-ui, "Segoe UI", "Segoe UI Variable", sans-serif'
++        fontSize={mainSize}
++        fontWeight="700"
++        letterSpacing="-0.03em"
++        fill={navy}
++      >
++        iMate
++      </text>
++
++      <text
++        x="100"
++        y="21.5"
++        fontFamily='system-ui, "Segoe UI", "Segoe UI Variable", sans-serif'
++        fontSize={rippleSize}
++        fontWeight="600"
++        letterSpacing="-0.02em"
++        fill={navy}
++      >
++        Ripple
++      </text>
++    </svg>
++  );
++}
+diff --git a/console/src/components/ThemeToggleButton/index.module.less b/console/src/components/ThemeToggleButton/index.module.less
+index d248b1e..22c6f3f 100644
+--- a/console/src/components/ThemeToggleButton/index.module.less
++++ b/console/src/components/ThemeToggleButton/index.module.less
+@@ -17,7 +17,7 @@
+ 
+   &:hover {
+     background: rgba(97, 92, 237, 0.08);
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ }
+ 
+@@ -29,13 +29,13 @@
+       color: rgba(26, 23, 22, 0.65);
+ 
+       &:hover {
+-        background: rgba(43, 18, 0, 0.06) !important;
++        background: rgba(8, 145, 178, 0.08) !important;
+       }
+     }
+ 
+     .copaw-dropdown-menu-item-selected,
+     .ant-dropdown-menu-item-selected {
+-      background: rgba(43, 18, 0, 0.03) !important;
++      background: rgba(8, 145, 178, 0.05) !important;
+       color: rgba(26, 23, 22, 0.88) !important;
+     }
+   }
 diff --git a/console/src/config/product.ts b/console/src/config/product.ts
 new file mode 100644
-index 0000000..0f2cd4d
+index 0000000..5381b65
 --- /dev/null
 +++ b/console/src/config/product.ts
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,13 @@
 +/**
 + * AxiMate Ripple (desktop) vs upstream CoPaw branding.
-+ * Enable with VITE_RIPPLE_DESKTOP=1 (see integrations/ripple/desktop-windows).
++ * Default on in this tree; set VITE_RIPPLE_DESKTOP=0 to use CoPaw PNG logos.
 + */
 +export const isRippleDesktop = import.meta.env.VITE_RIPPLE_DESKTOP === "1";
 +
-+export const appDisplayName = isRippleDesktop ? "AxiMate Ripple" : "CoPaw";
++/** User-facing app name in window title, alt text, and shell UI */
++export const appDisplayName = isRippleDesktop ? "Ripple Console" : "CoPaw";
 +export const appShortName = isRippleDesktop ? "Ripple" : "CoPaw";
-diff --git a/console/src/i18n.ts b/console/src/i18n.ts
-index 6fa931b..58b1bc2 100644
---- a/console/src/i18n.ts
-+++ b/console/src/i18n.ts
-@@ -28,4 +28,33 @@ i18n.use(initReactI18next).init({
-   },
- });
- 
-+/** AxiMate Ripple — override visible product strings when building desktop SKU */
-+if (import.meta.env.VITE_RIPPLE_DESKTOP === "1") {
-+  const rippleBundles: Record<string, Record<string, unknown>> = {
-+    en: {
-+      login: { title: "Sign in to AxiMate Ripple" },
-+      chat: {
-+        welcomeTextPlaceholder:
-+          "e.g. Hello! I'm AxiMate Ripple. How can I help you?",
-+      },
-+    },
-+    zh: {
-+      login: { title: "登录 AxiMate Ripple" },
-+      chat: {
-+        welcomeTextPlaceholder:
-+          "例如：你好！我是 AxiMate Ripple，需要什么帮助？",
-+      },
-+    },
-+    ja: {
-+      login: { title: "AxiMate Ripple にログイン" },
-+    },
-+    ru: {
-+      login: { title: "Вход в AxiMate Ripple" },
-+    },
-+  };
-+  for (const [lng, bundle] of Object.entries(rippleBundles)) {
-+    i18n.addResourceBundle(lng, "translation", bundle, true, true);
-+  }
-+}
 +
- export default i18n;
++export const upstreamProjectName = "CoPaw";
++export const upstreamProjectUrl = "https://github.com/agentscope-ai/CoPaw";
++export const apacheLicenseUrl = "https://www.apache.org/licenses/LICENSE-2.0";
+diff --git a/console/src/constants/brandColors.ts b/console/src/constants/brandColors.ts
+new file mode 100644
+index 0000000..c322846
+--- /dev/null
++++ b/console/src/constants/brandColors.ts
+@@ -0,0 +1,13 @@
++/** AxiMate brand palette (cyan) 鈥?use for tokens and hardcoded UI accents. */
++export const brandColors = {
++  primary: "#0891B2",
++  primaryHover: "#0E7490",
++  primaryLight: "#22D3EE",
++  surfaceLight: "#ECFEFF",
++  surfaceLightHover: "#CFFAFE",
++  textDeep: "#164E63",
++  /** Cyan-tinted overlays on white/light gray */
++  fillSubtle: "rgba(8, 145, 178, 0.06)",
++  fillMuted: "rgba(8, 145, 178, 0.10)",
++  borderSoft: "rgba(8, 145, 178, 0.22)",
++} as const;
+diff --git a/console/src/constants/channel.ts b/console/src/constants/channel.ts
+index 88a80a4..6b971d3 100644
+--- a/console/src/constants/channel.ts
++++ b/console/src/constants/channel.ts
+@@ -22,7 +22,7 @@ export const CHANNEL_COLORS: Record<string, string> = {
+   qq: "gold",
+   telegram: "geekblue",
+   mattermost: "purple",
+-  mqtt: "orange",
++  mqtt: "cyan",
+   console: "green",
+   matrix: "red",
+   voice: "geekblue",
 diff --git a/console/src/layouts/Header.tsx b/console/src/layouts/Header.tsx
-index edea196..c5fc3c5 100644
+index edea196..d41b965 100644
 --- a/console/src/layouts/Header.tsx
 +++ b/console/src/layouts/Header.tsx
-@@ -16,6 +16,7 @@ import {
+@@ -1,21 +1,20 @@
+-import { Layout, Space, Badge, Spin, Tooltip } from "antd";
++import { Layout, Space, Badge, Spin } from "antd";
+ import LanguageSwitcher from "../components/LanguageSwitcher/index";
+ import ThemeToggleButton from "../components/ThemeToggleButton";
++import AgentSelector from "../components/AgentSelector";
+ import { useTranslation } from "react-i18next";
+ import { Button, Modal } from "@agentscope-ai/design";
+ import styles from "./index.module.less";
+ import api from "../api";
+ import {
+-  GITHUB_URL,
+-  getDocsUrl,
+-  getFaqUrl,
+-  getReleaseNotesUrl,
+   PYPI_URL,
+   ONE_HOUR_MS,
+   UPDATE_MD,
    isStableVersion,
    compareVersions,
  } from "./constants";
 +import { appDisplayName, isRippleDesktop } from "../config/product";
++import RippleWordmarkLogo from "../components/RippleWordmarkLogo";
  import { useTheme } from "../contexts/ThemeContext";
  import { useState, useEffect } from "react";
  import ReactMarkdown from "react-markdown";
-@@ -159,9 +160,12 @@ export default function Header() {
-                 ? `${import.meta.env.BASE_URL}dark-logo.png`
-                 : `${import.meta.env.BASE_URL}logo.png`
-             }
+@@ -124,8 +123,10 @@ export default function Header() {
+     fetch(url, { cache: "no-cache" })
+       .then((res) => (res.ok ? res.text() : Promise.reject()))
+       .then((text) => {
+-        const zhPattern = /###\s*CoPaw濡備綍鏇存柊[\s\S]*?(?=\n###|$)/;
+-        const enPattern = /###\s*How to update CoPaw[\s\S]*?(?=\n###|$)/;
++        const zhPattern =
++          /###\s*(?:CoPaw|Ripple Console)濡備綍鏇存柊[\s\S]*?(?=\n###|$)/;
++        const enPattern =
++          /###\s*How to update (?:CoPaw|Ripple Console)[\s\S]*?(?=\n###|$)/;
+         const match = text.match(faqLang === "zh" ? zhPattern : enPattern);
+         setUpdateMarkdown(
+           match && lang !== "ru"
+@@ -138,35 +139,35 @@ export default function Header() {
+       });
+   };
+ 
+-  const handleNavClick = (url: string) => {
+-    if (url) {
+-      const pywebview = (window as any).pywebview;
+-      if (pywebview?.api) {
+-        pywebview.api.open_external_link(url);
+-      } else {
+-        window.open(url, "_blank");
+-      }
+-    }
+-  };
+-
+   return (
+     <>
+       <AntHeader className={styles.header}>
+         <div className={styles.logoWrapper}>
+-          <img
+-            src={
+-              isDark
+-                ? `${import.meta.env.BASE_URL}dark-logo.png`
+-                : `${import.meta.env.BASE_URL}logo.png`
+-            }
 -            alt="CoPaw"
-+            alt={appDisplayName}
-             className={styles.logoImg}
-           />
-+          {isRippleDesktop && (
-+            <span className={styles.productName}>{appDisplayName}</span>
+-            className={styles.logoImg}
+-          />
++          {isRippleDesktop ? (
++            <RippleWordmarkLogo
++              isDark={isDark}
++              className={styles.rippleWordmark}
++            />
++          ) : (
++            <img
++              src={
++                isDark
++                  ? `${import.meta.env.BASE_URL}dark-logo.png`
++                  : `${import.meta.env.BASE_URL}logo.png`
++              }
++              alt={appDisplayName}
++              className={styles.logoImg}
++            />
 +          )}
            <div className={styles.logoDivider} />
            {version && (
              <Badge
+               dot={!!hasUpdate}
+-              color="rgba(255, 157, 77, 1)"
++              color={
++                isRippleDesktop
++                  ? "#0891B2"
++                  : "rgba(255, 157, 77, 1)"
++              }
+               offset={[4, 28]}
+             >
+               <span
+@@ -183,38 +184,9 @@ export default function Header() {
+           )}
+         </div>
+         <Space size="middle">
+-          <Tooltip title={t("header.changelog")}>
+-            <Button
+-              type="text"
+-              onClick={() => handleNavClick(getReleaseNotesUrl(i18n.language))}
+-            >
+-              {t("header.changelog")}
+-            </Button>
+-          </Tooltip>
+-          <Tooltip title={t("header.docs")}>
+-            <Button
+-              type="text"
+-              onClick={() => handleNavClick(getDocsUrl(i18n.language))}
+-            >
+-              {t("header.docs")}
+-            </Button>
+-          </Tooltip>
+-          <Tooltip title={t("header.faq")}>
+-            <Button
+-              type="text"
+-              onClick={() => handleNavClick(getFaqUrl(i18n.language))}
+-            >
+-              {t("header.faq")}
+-            </Button>
+-          </Tooltip>
+-          <Tooltip title={t("header.github")}>
+-            <Button type="text" onClick={() => handleNavClick(GITHUB_URL)}>
+-              {t("header.github")}
+-            </Button>
+-          </Tooltip>
+-          <div className={styles.headerDivider} />
+           <LanguageSwitcher />
+           <ThemeToggleButton />
++          <AgentSelector />
+         </Space>
+       </AntHeader>
+ 
+@@ -226,14 +198,6 @@ export default function Header() {
+           <Button key="close" onClick={() => setUpdateModalOpen(false)}>
+             {t("common.close")}
+           </Button>,
+-          <Button
+-            key="releases"
+-            type="primary"
+-            className={styles.updateViewReleasesBtn}
+-            onClick={() => handleNavClick(getReleaseNotesUrl(i18n.language))}
+-          >
+-            {t("sidebar.updateModal.viewReleases")}
+-          </Button>,
+         ]}
+         width={960}
+         className={styles.updateModal}
+diff --git a/console/src/layouts/Sidebar.tsx b/console/src/layouts/Sidebar.tsx
+index 2088682..e6d480c 100644
+--- a/console/src/layouts/Sidebar.tsx
++++ b/console/src/layouts/Sidebar.tsx
+@@ -6,13 +6,13 @@ import {
+   Input,
+   Form,
+   Tooltip,
++  Typography,
+   type MenuProps,
+ } from "antd";
+ import { useState, useEffect } from "react";
+ import { useNavigate } from "react-router-dom";
+ import { useTranslation } from "react-i18next";
+ import { useAppMessage } from "../hooks/useAppMessage";
+-import AgentSelector from "../components/AgentSelector";
+ import {
+   SparkChatTabFill,
+   SparkWifiLine,
+@@ -41,6 +41,12 @@ import { authApi } from "../api/modules/auth";
+ import styles from "./index.module.less";
+ import { useTheme } from "../contexts/ThemeContext";
+ import { KEY_TO_PATH, DEFAULT_OPEN_KEYS } from "./constants";
++import {
++  isRippleDesktop,
++  upstreamProjectName,
++  upstreamProjectUrl,
++  apacheLicenseUrl,
++} from "../config/product";
+ 
+ // 鈹€鈹€ Layout 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+ 
+@@ -353,10 +359,6 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
+         collapsed ? ` ${styles.siderCollapsed}` : ""
+       }${isDark ? ` ${styles.siderDark}` : ""}`}
+     >
+-      <div className={styles.agentSelectorContainer}>
+-        <AgentSelector collapsed={collapsed} />
+-      </div>
+-
+       {collapsed ? (
+         <nav className={styles.collapsedNav}>
+           {collapsedNavItems.map((item) => {
+@@ -431,6 +433,22 @@ export default function Sidebar({ selectedKey }: SidebarProps) {
+         </div>
+       )}
+ 
++      {isRippleDesktop && !collapsed && (
++        <div className={styles.legalFooter}>
++          <Typography.Text type="secondary" className={styles.legalFooterText}>
++            {t("legal.notice", { upstream: upstreamProjectName })}{" "}
++            {t("legal.license")}{" "}
++            <a href={upstreamProjectUrl} target="_blank" rel="noreferrer">
++              {t("legal.upstreamProject")}
++            </a>
++            {" 路 "}
++            <a href={apacheLicenseUrl} target="_blank" rel="noreferrer">
++              {t("legal.apacheLicense")}
++            </a>
++          </Typography.Text>
++        </div>
++      )}
++
+       <div className={styles.collapseToggleContainer}>
+         <Button
+           type="text"
+diff --git a/console/src/layouts/constants.ts b/console/src/layouts/constants.ts
+index 859caa4..9759f26 100644
+--- a/console/src/layouts/constants.ts
++++ b/console/src/layouts/constants.ts
+@@ -122,9 +122,9 @@ export const compareVersions = (a: string, b: string): number => {
+ // 鈹€鈹€ Update markdown 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+ 
+ export const UPDATE_MD: Record<string, string> = {
+-  zh: `### CoPaw濡備綍鏇存柊
++  zh: `### Ripple Console 濡備綍鏇存柊
+ 
+-瑕佹洿鏂?CoPaw 鍒版渶鏂扮増鏈紝鍙牴鎹綘鐨勫畨瑁呮柟寮忛€夋嫨瀵瑰簲鏂规硶锛?+瑕佹洿鏂?Ripple Console锛堣繍琛屾椂鍩轰簬寮€婧?CoPaw锛夛紝鍙牴鎹綘鐨勫畨瑁呮柟寮忛€夋嫨瀵瑰簲鏂规硶锛? 
+ 1. 濡傛灉浣犱娇鐢ㄧ殑鏄竴閿畨瑁呰剼鏈紝鐩存帴閲嶆柊杩愯瀹夎鍛戒护鍗冲彲鑷姩鍗囩骇銆? 
+@@ -149,11 +149,11 @@ docker pull agentscope/copaw:latest
+ docker run -p 127.0.0.1:8088:8088 -v copaw-data:/app/working agentscope/copaw:latest
+ \`\`\`
+ 
+-鍗囩骇鍚庨噸鍚湇鍔?copaw app銆俙,
++鍗囩骇鍚庨噸鍚湇鍔★紙濡?copaw app 鎴栨偍鐨勫畨瑁呮柟寮忚鏄庯級銆俙,
+ 
+-  ru: `### 袣邪泻 芯斜薪芯胁懈褌褜 CoPaw
++  ru: `### 袣邪泻 芯斜薪芯胁懈褌褜 Ripple Console
+ 
+-效褌芯斜褘 芯斜薪芯胁懈褌褜 CoPaw, 胁褘斜械褉懈褌械 褋锌芯褋芯斜 胁 蟹邪胁懈褋懈屑芯褋褌懈 芯褌 褌懈锌邪 褍褋褌邪薪芯胁泻懈:
++效褌芯斜褘 芯斜薪芯胁懈褌褜 Ripple Console (薪邪 斜邪蟹械 芯褌泻褉褘褌芯谐芯 锌褉芯械泻褌邪 CoPaw), 胁褘斜械褉懈褌械 褋锌芯褋芯斜 胁 蟹邪胁懈褋懈屑芯褋褌懈 芯褌 褌懈锌邪 褍褋褌邪薪芯胁泻懈:
+ 
+ 1. 袝褋谢懈 胁褘 褍褋褌邪薪邪胁谢懈胁邪谢懈 褔械褉械蟹 芯写薪芯褋褌褉芯褔薪褘泄 褋泻褉懈锌褌, 锌芯胁褌芯褉薪芯 蟹邪锌褍褋褌懈褌械 褍褋褌邪薪芯胁褖懈泻 写谢褟 芯斜薪芯胁谢械薪懈褟.
+ 
+@@ -180,9 +180,9 @@ docker run -p 127.0.0.1:8088:8088 -v copaw-data:/app/working agentscope/copaw:la
+ 
+ 袩芯褋谢械 芯斜薪芯胁谢械薪懈褟 锌械褉械蟹邪锌褍褋褌懈褌械 褋械褉胁懈褋 褋 锌芯屑芯褖褜褞 \`copaw app\`.`,
+ 
+-  en: `### How to update CoPaw
++  en: `### How to update Ripple Console
+ 
+-To update CoPaw, use the method matching your installation type:
++To update Ripple Console (built on open-source CoPaw), use the method matching your installation type:
+ 
+ 1. If installed via one-line script, re-run the installer to upgrade.
+ 
 diff --git a/console/src/layouts/index.module.less b/console/src/layouts/index.module.less
-index a5aa1a8..bec7493 100644
+index a5aa1a8..c574cec 100644
 --- a/console/src/layouts/index.module.less
 +++ b/console/src/layouts/index.module.less
-@@ -248,6 +248,15 @@
+@@ -56,15 +56,6 @@
+   -ms-overflow-style: none;
+   /* IE and Edge */
+ 
+-  // AgentSelector container - fixed at top
+-  .agentSelectorContainer {
+-    position: sticky;
+-    top: 0;
+-    z-index: 10;
+-    background: #f9f8f4;
+-    margin-bottom: 12px;
+-  }
+-
+   // Menu takes remaining space
+   .sideMenu {
+     flex: 1;
+@@ -90,11 +81,6 @@
+   &.siderCollapsed {
+     padding: 0 8px;
+ 
+-    .agentSelectorContainer {
+-      display: flex;
+-      justify-content: center;
+-    }
+-
+     .collapseToggleContainer {
+       justify-content: center;
+       width: calc(100% + 16px);
+@@ -174,7 +160,7 @@
+ 
+     /* Selected item */
+     .copaw-menu-item-selected {
+-      background: rgba(43, 18, 0, 0.08) !important;
++      background: rgba(8, 145, 178, 0.1) !important;
+       color: inherit !important;
+       display: flex !important;
+       align-items: center !important;
+@@ -197,11 +183,6 @@
+   background: #1a1a1a !important;
+   border-right-color: rgba(255, 255, 255, 0.08) !important;
+ 
+-  // AgentSelector container - fixed at top (dark mode)
+-  .agentSelectorContainer {
+-    background: #1a1a1a;
+-  }
+-
+   :global {
+     .copaw-menu {
+       background: #1a1a1a !important;
+@@ -232,8 +213,8 @@
+ 
+     /* Selected item */
+     .copaw-menu-item-selected {
+-      background: rgba(255, 127, 22, 0.5) !important;
+-      color: #ff7f16 !important;
++      background: rgba(8, 145, 178, 0.35) !important;
++      color: #0891B2 !important;
+     }
+   }
+ }
+@@ -248,6 +229,13 @@
    width: auto;
  }
  
-+.productName {
-+  margin-left: 10px;
-+  font-size: 15px;
-+  font-weight: 600;
-+  color: #1a1716;
-+  letter-spacing: -0.02em;
-+  white-space: nowrap;
++.rippleWordmark {
++  display: block;
++  height: 28px;
++  width: auto;
++  flex-shrink: 0;
 +}
 +
  .logoDivider {
    width: 16px;
    height: 0px;
-@@ -565,6 +574,10 @@
-     color: rgba(255, 255, 255, 0.85);
-   }
+@@ -283,7 +271,7 @@
  
-+  .productName {
-+    color: rgba(255, 255, 255, 0.9);
-+  }
-+
-   .sider {
-     background: #1a1a1a !important;
-     border-right-color: rgba(255, 255, 255, 0.08) !important;
-diff --git a/console/src/main.tsx b/console/src/main.tsx
-index f1220b3..cb97895 100644
---- a/console/src/main.tsx
-+++ b/console/src/main.tsx
-@@ -1,6 +1,15 @@
- import { createRoot } from "react-dom/client";
- import App from "./App.tsx";
- import "./i18n";
-+import { isRippleDesktop, appDisplayName } from "./config/product";
-+
-+if (typeof document !== "undefined") {
-+  if (isRippleDesktop) {
-+    document.title = `${appDisplayName}`;
-+    document.body.classList.add("ripple-desktop");
-+    document.documentElement.classList.add("ripple-desktop");
-+  }
-+}
- 
- if (typeof window !== "undefined") {
-   const originalError = console.error;
-@@ -27,4 +36,6 @@ if (typeof window !== "undefined") {
-   };
+ .collapseBtn {
+   margin: auto;
+-  color: #ff7f16;
++  color: #0891B2;
  }
  
-+import "./styles/ripple-desktop.css";
-+
- createRoot(document.getElementById("root")!).render(<App />);
-diff --git a/console/src/styles/ripple-desktop.css b/console/src/styles/ripple-desktop.css
-new file mode 100644
-index 0000000..b5ed41f
---- /dev/null
-+++ b/console/src/styles/ripple-desktop.css
-@@ -0,0 +1,37 @@
-+/**
-+ * AxiMate Ripple — Windows-first desktop shell (active when html.ripple-desktop).
-+ */
-+html.ripple-desktop,
-+html.ripple-desktop body {
-+  /* Segoe UI Variable ships on Windows 10+ */
-+  font-family:
-+    "Segoe UI Variable",
-+    "Segoe UI",
-+    system-ui,
-+    -apple-system,
-+    sans-serif;
-+  -webkit-font-smoothing: antialiased;
-+  text-rendering: optimizeLegibility;
+ // 鈹€鈹€鈹€ Auth actions (account + logout) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+@@ -313,6 +301,40 @@
+   margin-top: 4px;
+ }
+ 
++.legalFooter {
++  flex-shrink: 0;
++  padding: 8px 12px 4px;
++  border-top: 1px solid rgba(0, 0, 0, 0.06);
 +}
 +
-+/* Scrollbars: closer to Win11 fluent feel in WebView2 / Electron */
-+html.ripple-desktop * {
-+  scrollbar-width: thin;
-+  scrollbar-color: rgba(120, 120, 120, 0.45) transparent;
++.legalFooterText {
++  display: block;
++  font-size: 10px !important;
++  line-height: 1.45 !important;
++  color: rgba(0, 0, 0, 0.45) !important;
++
++  a {
++    color: #0891b2;
++    text-decoration: none;
++
++    &:hover {
++      text-decoration: underline;
++    }
++  }
 +}
 +
-+html.ripple-desktop *::-webkit-scrollbar {
-+  width: 10px;
-+  height: 10px;
++.siderDark .legalFooter {
++  border-top-color: rgba(255, 255, 255, 0.08);
 +}
 +
-+html.ripple-desktop *::-webkit-scrollbar-thumb {
-+  background-color: rgba(120, 120, 120, 0.45);
-+  border-radius: 8px;
-+  border: 2px solid transparent;
-+  background-clip: padding-box;
++.siderDark .legalFooterText {
++  color: rgba(255, 255, 255, 0.45) !important;
++
++  a {
++    color: #67e8f9;
++  }
 +}
 +
-+html.ripple-desktop *::-webkit-scrollbar-thumb:hover {
-+  background-color: rgba(90, 90, 90, 0.55);
-+}
+ /* Collapse Toggle Button */
+ .collapseToggleContainer {
+   flex-shrink: 0;
+@@ -332,7 +354,7 @@
+ 
+   &:hover {
+     background: rgba(0, 0, 0, 0.06) !important;
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+   }
+ }
+ 
+@@ -373,7 +395,7 @@
+ }
+ 
+ .collapsedNavItemActive {
+-  background: rgba(43, 18, 0, 0.08) !important;
++  background: rgba(8, 145, 178, 0.1) !important;
+   color: rgba(0, 0, 0, 0.88) !important;
+ }
+ 
+@@ -429,7 +451,7 @@
+   align-items: center;
+   gap: 6px;
+   background: #fff;
+-  border: 1px solid rgba(43, 18, 0, 0.12);
++  border: 1px solid rgba(8, 145, 178, 0.2);
+   border-radius: 20px;
+   padding: 3px 12px;
+   font-size: 12px;
+@@ -444,11 +466,11 @@
+   font-weight: 500;
+   line-height: 64.78px;
+   letter-spacing: normal;
+-  color: #ff7f16;
++  color: #0891B2;
+ }
+ 
+ .updateModalTitle {
+-  color: #ff7f16;
++  color: #0891B2;
+ }
+ 
+ .updateModalBody {
+@@ -467,8 +489,8 @@
+ }
+ 
+ .updateViewReleasesBtn {
+-  background: #ff7f16 !important;
+-  border-color: #ff7f16 !important;
++  background: #0891B2 !important;
++  border-color: #0891B2 !important;
+   color: #fff !important;
+ 
+   &:hover {
+@@ -478,8 +500,8 @@
+ }
+ 
+ .updateModalPrimaryBtn {
+-  background: #ff7f16;
+-  border-color: #ff7f16;
++  background: #0891B2;
++  border-color: #0891B2;
+ }
+ 
+ // 鈹€鈹€鈹€ Code block inside update modal 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+@@ -575,11 +597,11 @@
+   }
+ 
+   .versionBadge {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   .collapseBtn {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   .authActions {
+@@ -600,7 +622,7 @@
+ 
+     &:hover {
+       background: rgba(255, 255, 255, 0.08);
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+   }
+ 
+@@ -614,7 +636,7 @@
+   }
+ 
+   .collapsedNavItemActive {
+-    background: rgba(255, 127, 22, 0.5) !important;
++    background: rgba(8, 145, 178, 0.35) !important;
+     color: rgba(255, 255, 255, 0.88) !important;
+   }
+ 
+diff --git a/console/src/locales/en.json b/console/src/locales/en.json
+index 8f9f8b4..9c468f9 100644
+--- a/console/src/locales/en.json
++++ b/console/src/locales/en.json
+@@ -26,6 +26,12 @@
+     "actions": "Actions",
+     "total": "Total {{count}}"
+   },
++  "legal": {
++    "notice": "Ripple Console includes software from the open-source {{upstream}} project.",
++    "license": "Licensed under Apache License 2.0.",
++    "upstreamProject": "CoPaw upstream",
++    "apacheLicense": "Apache-2.0 license text"
++  },
+   "chunkError": {
+     "title": "Failed to load page",
+     "subTitle": "This may be caused by a network issue or an application update.",
+@@ -80,7 +86,7 @@
+     "providerTypeLocalWhisperDesc": "Run transcription locally using the openai-whisper Python library. Requires both ffmpeg and openai-whisper to be installed.",
+     "localWhisperReady": "Local Whisper is ready. Both ffmpeg and openai-whisper are installed.",
+     "localWhisperMissing": "Local Whisper is not ready. Missing dependencies must be installed.",
+-    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}. Install missing dependencies: ffmpeg (system package) and openai-whisper (uv pip install openai-whisper, or install CoPaw with the [whisper] extra).",
++    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}. Install missing dependencies: ffmpeg (system package) and openai-whisper (uv pip install openai-whisper, or install the runtime with the [whisper] extra).",
+     "providerLabel": "Whisper API Provider",
+     "providerDescription": "Select which provider to use for audio transcription via the Whisper API. Only providers with a Whisper-compatible endpoint are shown.",
+     "providerPlaceholder": "Select a provider...",
+@@ -549,7 +555,7 @@
+     "welcomeGreeting": "Welcome Greeting",
+     "welcomeText": "Welcome Message",
+     "welcomeTextTooltip": "Message automatically sent when a user enters a single chat session with the bot for the first time that day",
+-    "welcomeTextPlaceholder": "e.g. Hello! I'm CoPaw. How can I help you?",
++    "welcomeTextPlaceholder": "e.g. Hello! I'm Ripple. How can I help you?",
+     "loginWeCom": "Get WeCom QR Code",
+     "wecomSetupGuide": "When creating a bot via QR code, please select \"Skip Authorization\" when asked to authorize bot capabilities. If you select \"Confirm Authorization\", users other than the bot creator may not be able to interact with the bot.",
+     "wecomScanAuth": "Scan to Authorize",
+@@ -938,7 +944,7 @@
+     "contextManagementTitle": "Context Management",
+     "memoryManagerBackend": "Memory Manager Backend",
+     "memoryManagerBackendTooltip": "Backend for the memory manager. Currently only ReMeLight is supported.",
+-    "memoryManagerBackendRestartWarning": "Switching the memory manager backend does not support hot reload. Save and restart CoPaw for changes to take effect.",
++    "memoryManagerBackendRestartWarning": "Switching the memory manager backend does not support hot reload. Save and restart the application for changes to take effect.",
+     "maxIters": "Max Iterations",
+     "maxItersTooltip": "Maximum number of reasoning-acting iterations for ReAct agent",
+     "maxItersPlaceholder": "Enter max iterations",
+@@ -1018,7 +1024,7 @@
+     "memorySummaryEnabled": "Activate Memory Summary",
+     "memorySummaryEnabledTooltip": "Automatically generate and save memory summaries during context compaction",
+     "forceMemorySearch": "Force Memory Search (beta)",
+-    "forceMemorySearchTooltip": "Force memory search to run on every conversation turn. Each query will retrieve relevant memories, helping CoPaw understand you better 鈥?but this increases token consumption. Note: enabling force memory search will break the KV cache, reducing cache hit rate. Use with caution.",
++    "forceMemorySearchTooltip": "Force memory search to run on every conversation turn. Each query will retrieve relevant memories, helping the assistant understand you better 鈥?but this increases token consumption. Note: enabling force memory search will break the KV cache, reducing cache hit rate. Use with caution.",
+     "forceMaxResults": "Force Search Max Results",
+     "forceMaxResultsTooltip": "Maximum number of results returned when force memory search is enabled",
+     "forceMaxResultsRequired": "Max results is required",
+@@ -1310,7 +1316,7 @@
+     }
+   },
+   "login": {
+-    "title": "Login to CoPaw",
++    "title": "Login to Ripple Console",
+     "registerTitle": "Create Account",
+     "firstUserHint": "Create your admin account to get started",
+     "usernamePlaceholder": "Username",
+diff --git a/console/src/locales/ja.json b/console/src/locales/ja.json
+index 1a357e4..39301c2 100644
+--- a/console/src/locales/ja.json
++++ b/console/src/locales/ja.json
+@@ -23,6 +23,12 @@
+     "contentPlaceholder": "鍐呭銈掑叆鍔涖仐銇︺亸銇犮仌銇?..",
+     "close": "闁夈仒銈?
+   },
++  "legal": {
++    "notice": "Ripple Console 銇伅銈兗銉椼兂銈姐兗銈广伄 {{upstream}} 銉椼儹銈搞偋銈儓鐢辨潵銇偨銉曘儓銈︺偋銈亴鍚伨銈屻伨銇欍€?,
++    "license": "Apache License 2.0 銇熀銇ャ亶銉┿偆銈汇兂銈广仌銈屻仸銇勩伨銇欍€?,
++    "upstreamProject": "CoPaw 銈儍銉椼偣銉堛儶銉笺儬",
++    "apacheLicense": "Apache-2.0 銉┿偆銈汇兂銈瑰叏鏂?
++  },
+   "chunkError": {
+     "title": "銉氥兗銈搞伄瑾伩杈笺伩銇け鏁椼仐銇俱仐銇?,
+     "subTitle": "銉嶃儍銉堛儻銉笺偗銇晱椤屻伨銇熴伅銈儣銉伄鏇存柊銇屽師鍥犮伄鍙兘鎬с亴銇傘倞銇俱仚銆?,
+@@ -876,7 +882,7 @@
+     "contextManagementTitle": "銈炽兂銉嗐偔銈广儓绠＄悊",
+     "memoryManagerBackend": "銉°儮銉優銉嶃兗銈搞儯銉笺儛銉冦偗銈ㄣ兂銉?,
+     "memoryManagerBackendTooltip": "銉°儮銉優銉嶃兗銈搞儯銉笺伄銉愩儍銈偍銉炽儔銈裤偆銉椼€傜従鍦ㄣ伅 ReMeLight 銇伩銈点儩銉笺儓銇曘倢銇︺亜銇俱仚銆?,
+-    "memoryManagerBackendRestartWarning": "銉°儮銉優銉嶃兗銈搞儯銉笺儛銉冦偗銈ㄣ兂銉夈伄鍒囥倞鏇裤亪銇儧銉冦儓銉儹銉笺儔銇蹇溿仐銇︺亜銇俱仜銈撱€傚鏇淬倰鍙嶆槧銇欍倠銇伅淇濆瓨寰屻伀 CoPaw 銈掑啀璧峰嫊銇椼仸銇忋仩銇曘亜銆?,
++    "memoryManagerBackendRestartWarning": "銉°儮銉優銉嶃兗銈搞儯銉笺儛銉冦偗銈ㄣ兂銉夈伄鍒囥倞鏇裤亪銇儧銉冦儓銉儹銉笺儔銇蹇溿仐銇︺亜銇俱仜銈撱€傚鏇淬倰鍙嶆槧銇欍倠銇伅淇濆瓨寰屻伀銈儣銉倰鍐嶈捣鍕曘仐銇︺亸銇犮仌銇勩€?,
+     "maxIters": "鏈€澶у弽寰╁洖鏁?,
+     "maxItersTooltip": "ReAct銈ㄣ兗銈搞偋銉炽儓銇帹璜栥兓琛屽嫊銈点偆銈儷銇渶澶у弽寰╁洖鏁?,
+     "maxItersPlaceholder": "鏈€澶у弽寰╁洖鏁般倰鍏ュ姏",
+@@ -956,7 +962,7 @@
+     "memorySummaryEnabled": "瑷樻喍銇俱仺銈併倰璧峰嫊",
+     "memorySummaryEnabledTooltip": "銈炽兂銉嗐偔銈广儓鍦х府鏅傘伀鑷嫊鐨勩伀瑷樻喍銈点優銉兗銈掔敓鎴愩兓淇濆瓨銇椼伨銇?,
+     "forceMemorySearch": "寮峰埗瑷樻喍妞滅储(beta)",
+-    "forceMemorySearchTooltip": "姣庡洖銇細瑭便仹瑷樻喍妞滅储銈掑挤鍒跺疅琛屻仐銇俱仚銆傚悇銈偍銉仹闁㈤€ｃ仚銈嬭鎲躲倰鍙栧緱銇椼€丆oPaw銇屻亗銇仧銈掋倛銈婄悊瑙ｃ仹銇嶃伨銇欍亴銆併儓銉笺偗銉虫秷璨汇亴澧楀姞銇椼伨銇欍€傛敞鎰忥細寮峰埗瑷樻喍妞滅储銈掓湁鍔广伀銇欍倠銇?KV 銈儯銉冦偡銉ャ亴鐒″姽銇仾銈娿€併偔銉ｃ儍銈枫儱銉掋儍銉堢巼銇屼綆涓嬨仐銇俱仚銆傛厧閲嶃伀鏈夊姽銇仐銇︺亸銇犮仌銇勩€?,
++    "forceMemorySearchTooltip": "姣庡洖銇細瑭便仹瑷樻喍妞滅储銈掑挤鍒跺疅琛屻仐銇俱仚銆傚悇銈偍銉仹闁㈤€ｃ仚銈嬭鎲躲倰鍙栧緱銇椼€併偄銈枫偣銈裤兂銉堛亴銇傘仾銇熴倰銈堛倞鐞嗚В銇с亶銇俱仚銇屻€併儓銉笺偗銉虫秷璨汇亴澧楀姞銇椼伨銇欍€傛敞鎰忥細寮峰埗瑷樻喍妞滅储銈掓湁鍔广伀銇欍倠銇?KV 銈儯銉冦偡銉ャ亴鐒″姽銇仾銈娿€併偔銉ｃ儍銈枫儱銉掋儍銉堢巼銇屼綆涓嬨仐銇俱仚銆傛厧閲嶃伀鏈夊姽銇仐銇︺亸銇犮仌銇勩€?,
+     "forceMaxResults": "寮峰埗妞滅储銇渶澶х祼鏋滄暟",
+     "forceMaxResultsTooltip": "寮峰埗瑷樻喍妞滅储銇屾湁鍔广仾鍫村悎銇繑銇曘倢銈嬫渶澶х祼鏋滄暟",
+     "forceMaxResultsRequired": "鏈€澶х祼鏋滄暟銇繀闋堛仹銇?,
+@@ -1245,7 +1251,7 @@
+     }
+   },
+   "login": {
+-    "title": "CoPaw 銇儹銈般偆銉?,
++    "title": "Ripple Console 銇儹銈般偆銉?,
+     "registerTitle": "銈偒銈︺兂銉堜綔鎴?,
+     "firstUserHint": "绠＄悊鑰呫偄銈偊銉炽儓銈掍綔鎴愩仐銇﹀銈併伨銇椼倗銇?,
+     "usernamePlaceholder": "銉︺兗銈躲兗鍚?,
+@@ -1307,7 +1313,7 @@
+     "providerTypeLocalWhisperDesc": "銉兗銈儷銇偆銉炽偣銉堛兗銉仌銈屻仧 openai-whisper Python 銉┿偆銉栥儵銉仹鏂囧瓧璧枫亾銇椼倰瀹熻銇椼伨銇欍€俧fmpeg 銇?openai-whisper 銇浮鏂广伄銈ゃ兂銈广儓銉笺儷銇屽繀瑕併仹銇欍€?,
+     "localWhisperReady": "銉兗銈儷 Whisper 銇簴鍌欏畬浜嗐仹銇欍€俧fmpeg 銇?openai-whisper 銇屻偆銉炽偣銉堛兗銉仌銈屻仸銇勩伨銇欍€?,
+     "localWhisperMissing": "銉兗銈儷 Whisper 銇簴鍌欍亴銇с亶銇︺亜銇俱仜銈撱€備笉瓒炽仐銇︺亜銈嬩緷瀛橀枹淇傘倰銈ゃ兂銈广儓銉笺儷銇椼仸銇忋仩銇曘亜銆?,
+-    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}銆備笉瓒炽仐銇︺亜銈嬩緷瀛橀枹淇傘倰銈ゃ兂銈广儓銉笺儷銇椼仸銇忋仩銇曘亜锛歠fmpeg锛堛偡銈广儐銉犮儜銉冦偙銉笺偢锛夈仺 openai-whisper锛坲v pip install openai-whisper銆併伨銇熴伅 CoPaw 銈?[whisper] 銈ㄣ偗銈广儓銉╀粯銇嶃仹銈ゃ兂銈广儓銉笺儷锛夈€?,
++    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}銆備笉瓒炽仐銇︺亜銈嬩緷瀛橀枹淇傘倰銈ゃ兂銈广儓銉笺儷銇椼仸銇忋仩銇曘亜锛歠fmpeg锛堛偡銈广儐銉犮儜銉冦偙銉笺偢锛夈仺 openai-whisper锛坲v pip install openai-whisper銆併伨銇熴伅 [whisper] 銈ㄣ偗銈广儓銉╀粯銇嶃仹銉┿兂銈裤偆銉犮倰銈ゃ兂銈广儓銉笺儷锛夈€?,
+     "providerLabel": "Whisper API 銉椼儹銉愩偆銉€銉?,
+     "providerDescription": "Whisper API 銇倛銈嬮煶澹版枃瀛楄捣銇撱仐銇娇鐢ㄣ仚銈嬨儣銉儛銈ゃ儉銉笺倰閬告姙銇椼伨銇欍€俉hisper 瀵惧繙銈ㄣ兂銉夈儩銈ゃ兂銉堛倰鎸併仱銉椼儹銉愩偆銉€銉笺伄銇胯〃绀恒仌銈屻伨銇欍€?,
+     "providerPlaceholder": "銉椼儹銉愩偆銉€銉笺倰閬告姙...",
+diff --git a/console/src/locales/ru.json b/console/src/locales/ru.json
+index 79efd6e..092ed73 100644
+--- a/console/src/locales/ru.json
++++ b/console/src/locales/ru.json
+@@ -23,6 +23,12 @@
+     "contentPlaceholder": "袙胁械写懈褌械 褋芯写械褉卸懈屑芯械...",
+     "close": "袟邪泻褉褘褌褜"
+   },
++  "legal": {
++    "notice": "Ripple Console 胁泻谢褞褔邪械褌 泻芯屑锌芯薪械薪褌褘 芯褌泻褉褘褌芯谐芯 锌褉芯械泻褌邪 {{upstream}}.",
++    "license": "袥懈褑械薪蟹懈褟 Apache License 2.0.",
++    "upstreamProject": "袠褋褏芯写薪褘泄 锌褉芯械泻褌 CoPaw",
++    "apacheLicense": "孝械泻褋褌 谢懈褑械薪蟹懈懈 Apache-2.0"
++  },
+   "chunkError": {
+     "title": "袧械 褍写邪谢芯褋褜 蟹邪谐褉褍蟹懈褌褜 褋褌褉邪薪懈褑褍",
+     "subTitle": "袙芯蟹屑芯卸薪芯, 褝褌芯 胁褘蟹胁邪薪芯 锌褉芯斜谢械屑芯泄 褋械褌懈 懈谢懈 芯斜薪芯胁谢械薪懈械屑 锌褉懈谢芯卸械薪懈褟.",
+@@ -881,7 +887,7 @@
+     "contextManagementTitle": "校锌褉邪胁谢械薪懈械 泻芯薪褌械泻褋褌芯屑",
+     "memoryManagerBackend": "袘褝泻械薪写 屑械薪械写卸械褉邪 锌邪屑褟褌懈",
+     "memoryManagerBackendTooltip": "孝懈锌 斜褝泻械薪写邪 屑械薪械写卸械褉邪 锌邪屑褟褌懈. 袙 薪邪褋褌芯褟褖械械 胁褉械屑褟 锌芯写写械褉卸懈胁邪械褌褋褟 褌芯谢褜泻芯 ReMeLight.",
+-    "memoryManagerBackendRestartWarning": "小屑械薪邪 斜褝泻械薪写邪 屑械薪械写卸械褉邪 锌邪屑褟褌懈 薪械 锌芯写写械褉卸懈胁邪械褌 谐芯褉褟褔褍褞 锌械褉械蟹邪谐褉褍蟹泻褍. 小芯褏褉邪薪懈褌械 懈 锌械褉械蟹邪锌褍褋褌懈褌械 CoPaw 写谢褟 锌褉懈屑械薪械薪懈褟 懈蟹屑械薪械薪懈泄.",
++    "memoryManagerBackendRestartWarning": "小屑械薪邪 斜褝泻械薪写邪 屑械薪械写卸械褉邪 锌邪屑褟褌懈 薪械 锌芯写写械褉卸懈胁邪械褌 谐芯褉褟褔褍褞 锌械褉械蟹邪谐褉褍蟹泻褍. 小芯褏褉邪薪懈褌械 懈 锌械褉械蟹邪锌褍褋褌懈褌械 锌褉懈谢芯卸械薪懈械 写谢褟 锌褉懈屑械薪械薪懈褟 懈蟹屑械薪械薪懈泄.",
+     "maxIters": "袦邪泻褋. 懈褌械褉邪褑懈泄",
+     "maxItersTooltip": "袦邪泻褋懈屑邪谢褜薪芯械 褔懈褋谢芯 懈褌械褉邪褑懈泄 褉邪褋褋褍卸写械薪懈械-写械泄褋褌胁懈械 写谢褟 邪谐械薪褌邪 ReAct",
+     "maxItersPlaceholder": "袙胁械写懈褌械 屑邪泻褋. 褔懈褋谢芯 懈褌械褉邪褑懈泄",
+@@ -961,7 +967,7 @@
+     "memorySummaryEnabled": "袟邪锌褍褋褌懈褌褜 褋胁芯写泻褍 锌邪屑褟褌懈",
+     "memorySummaryEnabledTooltip": "袗胁褌芯屑邪褌懈褔械褋泻懈 谐械薪械褉懈褉芯胁邪褌褜 懈 褋芯褏褉邪薪褟褌褜 褋胁芯写泻懈 锌邪屑褟褌懈 锌褉懈 褋卸邪褌懈懈 泻芯薪褌械泻褋褌邪",
+     "forceMemorySearch": "袩褉懈薪褍写懈褌械谢褜薪褘泄 锌芯懈褋泻 锌芯 锌邪屑褟褌懈 (beta)",
+-    "forceMemorySearchTooltip": "袩褉懈薪褍写懈褌械谢褜薪芯 蟹邪锌褍褋泻邪褌褜 锌芯懈褋泻 锌芯 锌邪屑褟褌懈 锌褉懈 泻邪卸写芯屑 写懈邪谢芯谐械. 袣邪卸写褘泄 蟹邪锌褉芯褋 斜褍写械褌 锌芯谢褍褔邪褌褜 褉械谢械胁邪薪褌薪褘械 胁芯褋锌芯屑懈薪邪薪懈褟, 锌芯屑芯谐邪褟 CoPaw 谢褍褔褕械 锌芯薪褟褌褜 胁邪褋 鈥?薪芯 褝褌芯 褍胁械谢懈褔懈胁邪械褌 褉邪褋褏芯写 褌芯泻械薪芯胁. 袙薪懈屑邪薪懈械: 胁泻谢褞褔械薪懈械 锌褉懈薪褍写懈褌械谢褜薪芯谐芯 锌芯懈褋泻邪 薪邪褉褍褕懈褌 KV-泻褝褕, 褋薪懈卸邪褟 褔邪褋褌芯褌褍 锌芯锌邪写邪薪懈泄 胁 泻褝褕. 袠褋锌芯谢褜蟹褍泄褌械 褋 芯褋褌芯褉芯卸薪芯褋褌褜褞.",
++    "forceMemorySearchTooltip": "袩褉懈薪褍写懈褌械谢褜薪芯 蟹邪锌褍褋泻邪褌褜 锌芯懈褋泻 锌芯 锌邪屑褟褌懈 锌褉懈 泻邪卸写芯屑 写懈邪谢芯谐械. 袣邪卸写褘泄 蟹邪锌褉芯褋 斜褍写械褌 锌芯谢褍褔邪褌褜 褉械谢械胁邪薪褌薪褘械 胁芯褋锌芯屑懈薪邪薪懈褟, 锌芯屑芯谐邪褟 邪褋褋懈褋褌械薪褌褍 谢褍褔褕械 锌芯薪褟褌褜 胁邪褋 鈥?薪芯 褝褌芯 褍胁械谢懈褔懈胁邪械褌 褉邪褋褏芯写 褌芯泻械薪芯胁. 袙薪懈屑邪薪懈械: 胁泻谢褞褔械薪懈械 锌褉懈薪褍写懈褌械谢褜薪芯谐芯 锌芯懈褋泻邪 薪邪褉褍褕懈褌 KV-泻褝褕, 褋薪懈卸邪褟 褔邪褋褌芯褌褍 锌芯锌邪写邪薪懈泄 胁 泻褝褕. 袠褋锌芯谢褜蟹褍泄褌械 褋 芯褋褌芯褉芯卸薪芯褋褌褜褞.",
+     "forceMaxResults": "袦邪泻褋. 褉械蟹褍谢褜褌邪褌芯胁 锌褉懈薪褍写懈褌械谢褜薪芯谐芯 锌芯懈褋泻邪",
+     "forceMaxResultsTooltip": "袦邪泻褋懈屑邪谢褜薪芯械 泻芯谢懈褔械褋褌胁芯 褉械蟹褍谢褜褌邪褌芯胁 锌褉懈 胁泻谢褞褔褢薪薪芯屑 锌褉懈薪褍写懈褌械谢褜薪芯屑 锌芯懈褋泻械 锌芯 锌邪屑褟褌懈",
+     "forceMaxResultsRequired": "孝褉械斜褍械褌褋褟 褍泻邪蟹邪褌褜 屑邪泻褋. 褔懈褋谢芯 褉械蟹褍谢褜褌邪褌芯胁",
+@@ -1250,7 +1256,7 @@
+     }
+   },
+   "login": {
+-    "title": "袙褏芯写 胁 CoPaw",
++    "title": "袙褏芯写 胁 Ripple Console",
+     "registerTitle": "小芯蟹写邪薪懈械 邪泻泻邪褍薪褌邪",
+     "firstUserHint": "小芯蟹写邪泄褌械 褍褔褢褌薪褍褞 蟹邪锌懈褋褜 邪写屑懈薪懈褋褌褉邪褌芯褉邪 写谢褟 薪邪褔邪谢邪 褉邪斜芯褌褘",
+     "usernamePlaceholder": "袠屑褟 锌芯谢褜蟹芯胁邪褌械谢褟",
+@@ -1312,7 +1318,7 @@
+     "providerTypeLocalWhisperDesc": "袟邪锌褍褋泻邪褌褜 褌褉邪薪褋泻褉懈锌褑懈褞 谢芯泻邪谢褜薪芯 褋 锌芯屑芯褖褜褞 斜懈斜谢懈芯褌械泻懈 openai-whisper. 孝褉械斜褍褞褌褋褟 ffmpeg 懈 openai-whisper.",
+     "localWhisperReady": "袥芯泻邪谢褜薪褘泄 Whisper 谐芯褌芯胁 泻 褉邪斜芯褌械. ffmpeg 懈 openai-whisper 褍褋褌邪薪芯胁谢械薪褘.",
+     "localWhisperMissing": "袥芯泻邪谢褜薪褘泄 Whisper 薪械 谐芯褌芯胁. 袧械芯斜褏芯写懈屑芯 褍褋褌邪薪芯胁懈褌褜 薪械写芯褋褌邪褞褖懈械 蟹邪胁懈褋懈屑芯褋褌懈.",
+-    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}. 校褋褌邪薪芯胁懈褌械 薪械写芯褋褌邪褞褖懈械 蟹邪胁懈褋懈屑芯褋褌懈: ffmpeg (褋懈褋褌械屑薪褘泄 锌邪泻械褌) 懈 openai-whisper (uv pip install openai-whisper 懈谢懈 褍褋褌邪薪芯胁懈褌械 CoPaw 褋 芯锌褑懈械泄 [whisper]).",
++    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}. 校褋褌邪薪芯胁懈褌械 薪械写芯褋褌邪褞褖懈械 蟹邪胁懈褋懈屑芯褋褌懈: ffmpeg (褋懈褋褌械屑薪褘泄 锌邪泻械褌) 懈 openai-whisper (uv pip install openai-whisper 懈谢懈 褍褋褌邪薪芯胁懈褌械 褋褉械写褍 胁褘锌芯谢薪械薪懈褟 褋 芯锌褑懈械泄 [whisper]).",
+     "providerLabel": "袩褉芯胁邪泄写械褉 Whisper API",
+     "providerDescription": "袙褘斜械褉懈褌械 锌褉芯胁邪泄写械褉邪 写谢褟 褌褉邪薪褋泻褉懈锌褑懈懈 邪褍写懈芯 褔械褉械蟹 Whisper API. 袨褌芯斜褉邪卸邪褞褌褋褟 褌芯谢褜泻芯 锌褉芯胁邪泄写械褉褘 褋 褋芯胁屑械褋褌懈屑褘屑 褝薪写锌芯懈薪褌芯屑.",
+     "providerPlaceholder": "袙褘斜械褉懈褌械 锌褉芯胁邪泄写械褉邪...",
+diff --git a/console/src/locales/zh.json b/console/src/locales/zh.json
+index 80d6c02..884f4bf 100644
+--- a/console/src/locales/zh.json
++++ b/console/src/locales/zh.json
+@@ -26,6 +26,12 @@
+     "actions": "鎿嶄綔",
+     "total": "鍏?{{count}} 鏉?
+   },
++  "legal": {
++    "notice": "Ripple Console 鍖呭惈寮€婧愰」鐩?{{upstream}} 鐨勭粍浠躲€?,
++    "license": "鐩稿叧缁勪欢閬靛惊 Apache License 2.0銆?,
++    "upstreamProject": "CoPaw 涓婃父椤圭洰",
++    "apacheLicense": "Apache-2.0 璁稿彲璇佸叏鏂?
++  },
+   "chunkError": {
+     "title": "椤甸潰鍔犺浇澶辫触",
+     "subTitle": "鍙兘鐢辩綉缁滈棶棰樻垨搴旂敤鏇存柊瀵艰嚧锛岃绋嶅悗閲嶈瘯銆?,
+@@ -523,7 +529,7 @@
+     "welcomeGreeting": "娆㈣繋璇?,
+     "welcomeText": "娆㈣繋娑堟伅",
+     "welcomeTextTooltip": "鐢ㄦ埛褰撳ぉ棣栨杩涘叆鏈哄櫒浜哄崟鑱婁細璇濇椂鏈哄櫒浜鸿嚜鍔ㄥ彂閫佺殑娑堟伅",
+-    "welcomeTextPlaceholder": "渚嬪锛氫綘濂斤紒鎴戞槸 CoPaw锛屾湁浠€涔堝彲浠ュ府浣犵殑锛?,
++    "welcomeTextPlaceholder": "渚嬪锛氫綘濂斤紒鎴戞槸 Ripple锛屾湁浠€涔堝彲浠ュ府浣犵殑锛?,
+     "loginWeCom": "鑾峰彇浼佷笟寰俊浜岀淮鐮?,
+     "wecomSetupGuide": "浣跨敤浜岀淮鐮佸垱寤烘満鍣ㄤ汉鏃讹紝鎺堟潈鏈哄櫒浜哄彲浣跨敤鐨勮兘鍔涙椂璇烽€夋嫨銆屾殏涓嶆巿鏉冦€嶃€傚鏋滈€夋嫨浜嗐€岀‘璁ゆ巿鏉冦€嶏紝闄や簡鏈哄櫒浜哄垱寤鸿€咃紝鍏朵粬鐢ㄦ埛鍙兘鏃犳硶涓庢満鍣ㄤ汉浜や簰銆?,
+     "wecomScanAuth": "鎵爜鎺堟潈",
+@@ -912,7 +918,7 @@
+     "contextManagementTitle": "涓婁笅鏂囩鐞?,
+     "memoryManagerBackend": "璁板繂绠＄悊鍚庣",
+     "memoryManagerBackendTooltip": "璁板繂绠＄悊鍣ㄧ殑鍚庣绫诲瀷锛岀洰鍓嶄粎鏀寔 ReMeLight",
+-    "memoryManagerBackendRestartWarning": "鍒囨崲璁板繂绠＄悊鍚庣涓嶆敮鎸佺儹鏇存柊锛屼繚瀛樺悗闇€瑕侀噸鍚?CoPaw 鎵嶈兘鐢熸晥",
++    "memoryManagerBackendRestartWarning": "鍒囨崲璁板繂绠＄悊鍚庣涓嶆敮鎸佺儹鏇存柊锛屼繚瀛樺悗闇€瑕侀噸鍚簲鐢ㄦ墠鑳界敓鏁?,
+     "maxIters": "鏈€澶ц凯浠ｆ鏁?,
+     "maxItersTooltip": "ReAct 鏅鸿兘浣撶殑鏈€澶ф帹鐞?琛屽姩杩唬娆℃暟",
+     "maxItersPlaceholder": "璇疯緭鍏ユ渶澶ц凯浠ｆ鏁?,
+@@ -992,7 +998,7 @@
+     "memorySummaryEnabled": "鍚姩璁板繂鎬荤粨",
+     "memorySummaryEnabledTooltip": "鍦ㄤ笂涓嬫枃鍘嬬缉鏃惰嚜鍔ㄧ敓鎴愬苟淇濆瓨璁板繂鎬荤粨",
+     "forceMemorySearch": "寮哄埗璁板繂鎼滅储(beta)",
+-    "forceMemorySearchTooltip": "姣忚疆瀵硅瘽閮藉己鍒惰Е鍙戣蹇嗘悳绱€傛瘡娆?query 杩涙潵閮戒細璋冪敤璁板繂锛岃 CoPaw 鏇存噦浣狅紝浣嗕細澧炲姞 token 娑堣€椼€傛敞鎰忥細寮哄埗璁板繂鎼滅储浼氱牬鍧?KV Cache锛岄€犳垚缂撳瓨鍛戒腑鐜囬檷浣庯紝璇疯皑鎱庡紑鍚€?,
++    "forceMemorySearchTooltip": "姣忚疆瀵硅瘽閮藉己鍒惰Е鍙戣蹇嗘悳绱€傛瘡娆?query 杩涙潵閮戒細璋冪敤璁板繂锛岃鍔╂墜鏇存噦浣狅紝浣嗕細澧炲姞 token 娑堣€椼€傛敞鎰忥細寮哄埗璁板繂鎼滅储浼氱牬鍧?KV Cache锛岄€犳垚缂撳瓨鍛戒腑鐜囬檷浣庯紝璇疯皑鎱庡紑鍚€?,
+     "forceMaxResults": "寮哄埗鎼滅储鏈€澶х粨鏋滄暟",
+     "forceMaxResultsTooltip": "寮哄埗璁板繂鎼滅储鏃惰繑鍥炵殑鏈€澶х粨鏋滄暟",
+     "forceMaxResultsRequired": "鏈€澶х粨鏋滄暟涓哄繀濉」",
+@@ -1284,7 +1290,7 @@
+     }
+   },
+   "login": {
+-    "title": "鐧诲綍 CoPaw",
++    "title": "鐧诲綍 Ripple Console",
+     "registerTitle": "鍒涘缓璐︽埛",
+     "firstUserHint": "鍒涘缓绠＄悊鍛樿处鎴蜂互寮€濮嬩娇鐢?,
+     "usernamePlaceholder": "鐢ㄦ埛鍚?,
+@@ -1346,7 +1352,7 @@
+     "providerTypeLocalWhisperDesc": "浣跨敤鏈湴瀹夎鐨?openai-whisper Python 搴撹繘琛岃浆鍐欍€傞渶瑕佸悓鏃跺畨瑁?ffmpeg 鍜?openai-whisper銆?,
+     "localWhisperReady": "鏈湴 Whisper 宸插氨缁€俧fmpeg 鍜?openai-whisper 鍧囧凡瀹夎銆?,
+     "localWhisperMissing": "鏈湴 Whisper 鏈氨缁紝缂哄皯蹇呰渚濊禆銆?,
+-    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}銆傝瀹夎缂哄皯鐨勪緷璧栵細ffmpeg锛堢郴缁熷寘锛夊拰 openai-whisper锛坲v pip install openai-whisper锛屾垨浣跨敤 [whisper] 棰濆渚濊禆瀹夎 CoPaw锛夈€?,
++    "localWhisperMissingDesc": "ffmpeg: {{ffmpeg}} | openai-whisper: {{whisper}}銆傝瀹夎缂哄皯鐨勪緷璧栵細ffmpeg锛堢郴缁熷寘锛夊拰 openai-whisper锛坲v pip install openai-whisper锛屾垨浣跨敤 [whisper] 棰濆渚濊禆瀹夎杩愯鏃讹級銆?,
+     "providerLabel": "Whisper API 鎻愪緵鍟?,
+     "providerDescription": "閫夋嫨鐢ㄤ簬 Whisper API 闊抽杞啓鐨勬彁渚涘晢銆備粎鏄剧ず鏀寔 Whisper 绔偣鐨勬彁渚涘晢銆?,
+     "providerPlaceholder": "閫夋嫨鎻愪緵鍟?..",
+diff --git a/console/src/pages/Agent/Config/index.module.less b/console/src/pages/Agent/Config/index.module.less
+index a087180..46515a4 100644
+--- a/console/src/pages/Agent/Config/index.module.less
++++ b/console/src/pages/Agent/Config/index.module.less
+@@ -7,11 +7,11 @@
+ 
+   :global {
+     .copaw-slider-track {
+-      background-color: #ff7f16;
++      background-color: #0891B2;
+     }
+ 
+     .copaw-slider .copaw-slider-handle::after {
+-      box-shadow: 0 0 0 2px #ff7f16;
++      box-shadow: 0 0 0 2px #0891B2;
+     }
+   }
+ }
+@@ -194,6 +194,6 @@
+   }
+ 
+   .sliderValue {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ }
+diff --git a/console/src/pages/Agent/Skills/index.module.less b/console/src/pages/Agent/Skills/index.module.less
+index 8e9c852..3af2834 100644
+--- a/console/src/pages/Agent/Skills/index.module.less
++++ b/console/src/pages/Agent/Skills/index.module.less
+@@ -380,7 +380,7 @@
+ 
+ .descriptionText {
+   border-radius: 4px;
+-  background: rgba(43, 18, 0, 0.02);
++  background: rgba(8, 145, 178, 0.04);
+   box-sizing: border-box;
+   border: 1px solid #f3f1f0;
+   padding: 2px 4px;
+@@ -757,7 +757,7 @@
+   transition: all 0.15s ease;
+ 
+   &:hover {
+-    border-color: #ff7f16;
++    border-color: #0891B2;
+   }
+ 
+   &.pickerAllCard {
+@@ -778,7 +778,7 @@
+   width: 18px;
+   height: 18px;
+   border-radius: 50%;
+-  background: #ff7f16;
++  background: #0891B2;
+   color: #fff;
+   display: flex;
+   align-items: center;
+@@ -1334,7 +1334,7 @@
+   }
+ 
+   .selectedCard {
+-    border-color: #ff7f16 !important;
++    border-color: #0891B2 !important;
+     box-shadow: 0 0 0 1px rgba(255, 127, 22, 0.3) !important;
+   }
+ 
+diff --git a/console/src/pages/Agent/Tools/index.module.less b/console/src/pages/Agent/Tools/index.module.less
+index 2e1c7da..14b7b54 100644
+--- a/console/src/pages/Agent/Tools/index.module.less
++++ b/console/src/pages/Agent/Tools/index.module.less
+@@ -82,13 +82,13 @@
+ }
+ 
+ .disabledTab {
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+   background: #fff !important;
+   cursor: not-allowed;
+   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+ 
+   &:hover {
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+     background: #fff !important;
+   }
+ }
+@@ -336,7 +336,7 @@
+     }
+ 
+     :global(.copaw-switch-checked) {
+-      background-color: #ff7f16;
++      background-color: #0891B2;
+ 
+       &:hover:not(.copaw-switch-disabled) {
+         background-color: #ff9d4d;
+diff --git a/console/src/pages/Agent/Workspace/index.module.less b/console/src/pages/Agent/Workspace/index.module.less
+index 91de652..cb70c11 100644
+--- a/console/src/pages/Agent/Workspace/index.module.less
++++ b/console/src/pages/Agent/Workspace/index.module.less
+@@ -300,7 +300,7 @@
+   }
+ 
+   &.selected {
+-    border: 1px solid #ff7f16;
++    border: 1px solid #0891B2;
+   }
+ }
+ 
+@@ -340,13 +340,13 @@
+   }
+ 
+   &:hover {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ }
+ 
+ .dragging {
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+-  border-color: #ff7f16 !important;
++  border-color: #0891B2 !important;
+ }
+ 
+ .enabledBadge {
+@@ -400,7 +400,7 @@
+   }
+ 
+   &.selected {
+-    border: 1px solid #ff7f16;
++    border: 1px solid #0891B2;
+   }
+ }
+ 
+@@ -460,7 +460,7 @@
+     }
+ 
+     &.selected {
+-      border-color: #ff7f16;
++      border-color: #0891B2;
+       background-color: rgba(97, 92, 237, 0.15);
+     }
+   }
+@@ -481,13 +481,13 @@
+     color: rgba(255, 255, 255, 0.2);
+ 
+     &:hover {
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+   }
+ 
+   .dragging {
+     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+-    border-color: #ff7f16 !important;
++    border-color: #0891B2 !important;
+     background-color: rgba(97, 92, 237, 0.15) !important;
+   }
+ 
+@@ -502,7 +502,7 @@
+     }
+ 
+     &.selected {
+-      border-color: #ff7f16;
++      border-color: #0891B2;
+       background-color: rgba(97, 92, 237, 0.15);
+     }
+   }
+diff --git a/console/src/pages/Chat/ModelSelector/index.module.less b/console/src/pages/Chat/ModelSelector/index.module.less
+index c85e58e..d5fa125 100644
+--- a/console/src/pages/Chat/ModelSelector/index.module.less
++++ b/console/src/pages/Chat/ModelSelector/index.module.less
+@@ -15,8 +15,8 @@
+ 
+   &:hover,
+   &.triggerActive {
+-    border-color: #ff7f16;
+-    color: #ff7f16;
++    border-color: #0891B2;
++    color: #0891B2;
+     box-shadow: 0 2px 8px rgba(97, 92, 237, 0.12);
+   }
+ }
+@@ -38,7 +38,7 @@
+ 
+   &.triggerArrowOpen {
+     transform: rotate(180deg);
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ }
+ 
+@@ -74,7 +74,7 @@
+ 
+   &:hover {
+     background: rgba(97, 92, 237, 0.06);
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   &:hover :global(.modelSubmenu) {
+@@ -150,7 +150,7 @@
+ 
+   &:hover {
+     background: rgba(97, 92, 237, 0.06);
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   &:first-child {
+@@ -163,7 +163,7 @@
+ 
+   &.modelItemActive {
+     background: rgba(97, 92, 237, 0.08);
+-    color: #ff7f16;
++    color: #0891B2;
+     font-weight: 500;
+   }
+ }
+@@ -177,7 +177,7 @@
+ .checkIcon {
+   flex-shrink: 0;
+   font-size: 16px;
+-  color: #ff7f16;
++  color: #0891B2;
+ }
+ 
+ .emptyTip {
+@@ -198,7 +198,7 @@
+ 
+     &:hover,
+     &.triggerActive {
+-      color: #ff7f16;
++      color: #0891B2;
+       box-shadow: 0 2px 8px rgba(97, 92, 237, 0.2);
+     }
+   }
+@@ -207,7 +207,7 @@
+     color: rgba(255, 255, 255, 0.3);
+ 
+     &.triggerArrowOpen {
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+   }
+ 
+@@ -222,7 +222,7 @@
+ 
+     &:hover {
+       background: rgba(97, 92, 237, 0.15);
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+   }
+ 
+@@ -241,17 +241,17 @@
+ 
+     &:hover {
+       background: rgba(97, 92, 237, 0.15);
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+ 
+     &.modelItemActive {
+       background: rgba(97, 92, 237, 0.18);
+-      color: #ff7f16;
++      color: #0891B2;
+     }
+   }
+ 
+   .checkIcon {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   .emptyTip {
+diff --git a/console/src/pages/Chat/ModelSelector/index.tsx b/console/src/pages/Chat/ModelSelector/index.tsx
+index 6608ca6..3d95437 100644
+--- a/console/src/pages/Chat/ModelSelector/index.tsx
++++ b/console/src/pages/Chat/ModelSelector/index.tsx
+@@ -243,7 +243,7 @@ export default function ModelSelector() {
+           )}
+         >
+           {saving && (
+-            <LoadingOutlined style={{ fontSize: 11, color: "#FF7F16" }} />
++            <LoadingOutlined style={{ fontSize: 11, color: "#0891B2" }} />
+           )}
+           {activeProviderIconUrl && (
+             <img
+diff --git a/console/src/pages/Chat/OptionsPanel/defaultConfig.ts b/console/src/pages/Chat/OptionsPanel/defaultConfig.ts
+index 16c8036..3905ffd 100644
+--- a/console/src/pages/Chat/OptionsPanel/defaultConfig.ts
++++ b/console/src/pages/Chat/OptionsPanel/defaultConfig.ts
+@@ -1,13 +1,14 @@
+ import type { TFunction } from "i18next";
++import { isRippleDesktop } from "../../../config/product";
+ 
+ const defaultConfig = {
+   theme: {
+-    colorPrimary: "#FF7F16",
++    colorPrimary: "#0891B2",
+     darkMode: false,
+     prefix: "copaw",
+     leftHeader: {
+       logo: "",
+-      title: "Work with CoPaw",
++      title: isRippleDesktop ? "Ripple Console" : "CoPaw Console",
+     },
+   },
+   sender: {
+@@ -19,7 +20,7 @@ const defaultConfig = {
+     greeting: "Hello, how can I help you today?",
+     description:
+       "I am a helpful assistant that can help you with your questions.",
+-    avatar: `${import.meta.env.BASE_URL}copaw-symbol.svg`,
++    avatar: `${import.meta.env.BASE_URL}assistant-avatar.svg`,
+     prompts: [
+       {
+         value: "Let's start a new journey!",
+diff --git a/console/src/pages/Chat/components/ChatSessionItem/index.module.less b/console/src/pages/Chat/components/ChatSessionItem/index.module.less
+index 1ae0f72..0ba2158 100644
+--- a/console/src/pages/Chat/components/ChatSessionItem/index.module.less
++++ b/console/src/pages/Chat/components/ChatSessionItem/index.module.less
+@@ -27,7 +27,7 @@
+ 
+   &:hover {
+     border-radius: 6px;
+-    background: var(--color-fill-tertiary, rgba(43, 18, 0, 0.03));
++    background: var(--color-fill-tertiary, rgba(8, 145, 178, 0.06));
+ 
+     .actions {
+       opacity: 1;
+@@ -50,7 +50,7 @@
+ 
+   &.active {
+     border-radius: 6px;
+-    background: var(--color-fill-tertiary, rgba(43, 18, 0, 0.03));
++    background: var(--color-fill-tertiary, rgba(8, 145, 178, 0.06));
+   }
+ 
+   // Reserve right-side padding for the edit input in editing mode
+@@ -176,7 +176,7 @@
+   font-weight: 500;
+   line-height: 18px;
+   color: var(--colorTextSecondary, rgba(26, 23, 22, 0.55));
+-  background: var(--color-fill-tertiary, rgba(43, 18, 0, 0.06));
++  background: var(--color-fill-tertiary, rgba(8, 145, 178, 0.08));
+   min-width: 0;
+ }
+ 
+diff --git a/console/src/pages/Chat/index.module.less b/console/src/pages/Chat/index.module.less
+index 390b436..558527c 100644
+--- a/console/src/pages/Chat/index.module.less
++++ b/console/src/pages/Chat/index.module.less
+@@ -88,7 +88,7 @@
+ 
+ .suggestionCommand {
+   flex: 0 0 88px;
+-  color: #ff7f16;
++  color: #0891B2;
+   font-weight: 600;
+   white-space: nowrap;
+ }
+@@ -105,7 +105,7 @@
+ 
+ :global(.dark-mode) {
+   .suggestionCommand {
+-    color: #ff7f16;
++    color: #0891B2;
+   }
+ 
+   .suggestionDescription {
+@@ -118,7 +118,7 @@
+   .chat-anywhere-prompt-icon,
+   [class*="prompt-icon"],
+   [class*="PromptIcon"] {
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+   }
+ }
+ 
+diff --git a/console/src/pages/Chat/index.tsx b/console/src/pages/Chat/index.tsx
+index cbd4183..43d5b5c 100644
+--- a/console/src/pages/Chat/index.tsx
++++ b/console/src/pages/Chat/index.tsx
+@@ -19,6 +19,7 @@ import { providerApi } from "../../api/modules/provider";
+ import type { ProviderInfo, ModelInfo } from "../../api/types";
+ import ModelSelector from "./ModelSelector";
+ import { useTheme } from "../../contexts/ThemeContext";
++import { appShortName } from "../../config/product";
+ import { useAgentStore } from "../../stores/agentStore";
+ import { useChatAnywhereInput } from "@agentscope-ai/chat";
+ import styles from "./index.module.less";
+@@ -736,9 +737,8 @@ export default function ChatPage() {
+       },
+       welcome: {
+         ...i18nConfig.welcome,
+-        nick: "CoPaw",
+-        avatar:
+-          "https://gw.alicdn.com/imgextra/i2/O1CN01pyXzjQ1EL1PuZMlSd_!!6000000000334-2-tps-288-288.png",
++        nick: appShortName,
++        avatar: `${import.meta.env.BASE_URL}assistant-avatar.svg`,
+       },
+       sender: {
+         ...(i18nConfig as any)?.sender,
+diff --git a/console/src/pages/Control/Channels/components/ChannelDrawer.tsx b/console/src/pages/Control/Channels/components/ChannelDrawer.tsx
+index 6fd18e4..ce091d9 100644
+--- a/console/src/pages/Control/Channels/components/ChannelDrawer.tsx
++++ b/console/src/pages/Control/Channels/components/ChannelDrawer.tsx
+@@ -941,7 +941,7 @@ export function ChannelDrawer({
+               window.open(finalUrl, "_blank");
+             }}
+             className={styles.dingtalkDocBtn}
+-            style={{ color: "#FF7F16" }}
++            style={{ color: "#0891B2" }}
+           >
+             {label} Doc
+           </Button>
+@@ -955,7 +955,7 @@ export function ChannelDrawer({
+             window.open(TWILIO_CONSOLE_URL, "_blank", "noopener,noreferrer")
+           }
+           className={styles.dingtalkDocBtn}
+-          style={{ color: "#FF7F16" }}
++          style={{ color: "#0891B2" }}
+         >
+           {t("channels.voiceSetupLink")}
+         </Button>
+diff --git a/console/src/pages/Control/Channels/index.module.less b/console/src/pages/Control/Channels/index.module.less
+index 3630996..9e625cb 100644
+--- a/console/src/pages/Control/Channels/index.module.less
++++ b/console/src/pages/Control/Channels/index.module.less
+@@ -148,7 +148,7 @@
+   width: 32px;
+   height: 32px;
+   border-radius: 8px;
+-  color: #f07e26;
++  color: #0891B2;
+   flex-shrink: 0;
+ 
+   img {
+@@ -345,7 +345,7 @@
+ 
+   .filterTabActive {
+     background: #2a2a2a;
+-    color: #ff7f16;
++    color: #0891B2;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+   }
+ 
+diff --git a/console/src/pages/Login/index.tsx b/console/src/pages/Login/index.tsx
+index 4a44dcb..909ba3e 100644
+--- a/console/src/pages/Login/index.tsx
++++ b/console/src/pages/Login/index.tsx
+@@ -1,12 +1,20 @@
+ import { useState, useEffect } from "react";
+ import { useTranslation } from "react-i18next";
+ import { useNavigate, useSearchParams } from "react-router-dom";
+-import { Button, Form, Input } from "antd";
++import { Button, Form, Input, Typography } from "antd";
+ import { useAppMessage } from "../../hooks/useAppMessage";
+ import { LockOutlined, UserOutlined } from "@ant-design/icons";
+ import { authApi } from "../../api/modules/auth";
+ import { setAuthToken } from "../../api/config";
+ import { useTheme } from "../../contexts/ThemeContext";
++import {
++  appDisplayName,
++  isRippleDesktop,
++  upstreamProjectName,
++  upstreamProjectUrl,
++  apacheLicenseUrl,
++} from "../../config/product";
++import RippleWordmarkLogo from "../../components/RippleWordmarkLogo";
+ 
+ export default function LoginPage() {
+   const { t } = useTranslation();
+@@ -95,13 +103,20 @@ export default function LoginPage() {
+         }}
+       >
+         <div style={{ textAlign: "center", marginBottom: 32 }}>
+-          <img
+-            src={`${import.meta.env.BASE_URL}${
+-              isDark ? "dark-logo.png" : "logo.png"
+-            }`}
+-            alt="CoPaw"
+-            style={{ height: 48, marginBottom: 12 }}
+-          />
++          {isRippleDesktop ? (
++            <RippleWordmarkLogo
++              isDark={isDark}
++              style={{ height: 44, width: "100%", marginBottom: 12 }}
++            />
++          ) : (
++            <img
++              src={`${import.meta.env.BASE_URL}${
++                isDark ? "dark-logo.png" : "logo.png"
++              }`}
++              alt={appDisplayName}
++              style={{ height: 48, marginBottom: 12 }}
++            />
++          )}
+           <h2 style={{ margin: 0, fontWeight: 600, fontSize: 20 }}>
+             {isRegister ? t("login.registerTitle") : t("login.title")}
+           </h2>
+@@ -169,6 +184,29 @@ export default function LoginPage() {
+             </Button>
+           </Form.Item>
+         </Form>
++
++        {isRippleDesktop && (
++          <Typography.Paragraph
++            type="secondary"
++            style={{
++              marginTop: 20,
++              marginBottom: 0,
++              fontSize: 11,
++              lineHeight: 1.5,
++              textAlign: "center",
++            }}
++          >
++            {t("legal.notice", { upstream: upstreamProjectName })}{" "}
++            {t("legal.license")}{" "}
++            <a href={upstreamProjectUrl} target="_blank" rel="noreferrer">
++              {t("legal.upstreamProject")}
++            </a>
++            {" 路 "}
++            <a href={apacheLicenseUrl} target="_blank" rel="noreferrer">
++              {t("legal.apacheLicense")}
++            </a>
++          </Typography.Paragraph>
++        )}
+       </div>
+     </div>
+   );
+diff --git a/console/src/pages/Settings/Agents/index.module.less b/console/src/pages/Settings/Agents/index.module.less
+index db0a7f5..7828e34 100644
+--- a/console/src/pages/Settings/Agents/index.module.less
++++ b/console/src/pages/Settings/Agents/index.module.less
+@@ -259,7 +259,7 @@
+ 
+   &:hover {
+     background: rgba(255, 255, 255, 0.08) !important;
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+   }
+ 
+   .anticon,
+diff --git a/console/src/pages/Settings/Environments/index.module.less b/console/src/pages/Settings/Environments/index.module.less
+index 9e5b84f..64ad526 100644
+--- a/console/src/pages/Settings/Environments/index.module.less
++++ b/console/src/pages/Settings/Environments/index.module.less
+@@ -203,7 +203,7 @@
+   transition: all 0.2s ease-in-out;
+ 
+   &:focus-within {
+-    border-color: #ff7f16;
++    border-color: #0891B2;
+     box-shadow: 0 0 0 2px rgba(97, 92, 237, 0.2);
+     transform: translateY(-1px);
+   }
+@@ -250,7 +250,7 @@
+   transition: all 0.2s ease-in-out;
+ 
+   .inputGroup:focus-within & {
+-    color: #ff7f16;
++    color: #0891B2;
+     background: #f0f0ff;
+   }
+ }
+@@ -304,7 +304,7 @@
+   border-radius: 4px;
+ 
+   &:hover {
+-    color: #ff7f16;
++    color: #0891B2;
+     background: #f0f0ff;
+   }
+ }
+@@ -333,7 +333,7 @@
+   transition: all 0.2s ease-in-out;
+ 
+   &:hover {
+-    color: #ff7f16;
++    color: #0891B2;
+     background: #f0f0ff;
+     transform: translateY(-1px);
+     box-shadow: 0 2px 8px rgba(97, 92, 237, 0.15);
+@@ -388,8 +388,8 @@
+   transition: all 0.2s ease-in-out;
+ 
+   &:hover {
+-    color: #ff7f16;
+-    border-color: #ff7f16;
++    color: #0891B2;
++    border-color: #0891B2;
+     background: #f0f0ff;
+     transform: translateY(-1px);
+     box-shadow: 0 2px 8px rgba(97, 92, 237, 0.15);
+@@ -493,7 +493,7 @@
+     background: #2a2a2a;
+ 
+     &:focus-within {
+-      border-color: #ff7f16;
++      border-color: #0891B2;
+       box-shadow: 0 0 0 2px rgba(97, 92, 237, 0.2);
+     }
+   }
+@@ -505,7 +505,7 @@
+     background: rgba(255, 255, 255, 0.04);
+ 
+     .inputGroup:focus-within & {
+-      color: #ff7f16;
++      color: #0891B2;
+       background: rgba(97, 92, 237, 0.1);
+     }
+   }
+@@ -534,7 +534,7 @@
+     color: rgba(255, 255, 255, 0.3);
+ 
+     &:hover {
+-      color: #ff7f16;
++      color: #0891B2;
+       background: rgba(97, 92, 237, 0.12);
+     }
+   }
+@@ -544,7 +544,7 @@
+     color: rgba(255, 255, 255, 0.2);
+ 
+     &:hover {
+-      color: #ff7f16;
++      color: #0891B2;
+       background: rgba(97, 92, 237, 0.12);
+     }
+   }
+@@ -571,8 +571,8 @@
+     color: rgba(255, 255, 255, 0.35);
+ 
+     &:hover {
+-      color: #ff7f16;
+-      border-color: #ff7f16;
++      color: #0891B2;
++      border-color: #0891B2;
+       background: rgba(97, 92, 237, 0.1);
+     }
+   }
+diff --git a/console/src/pages/Settings/Models/components/modals/LocalModelManageModal.tsx b/console/src/pages/Settings/Models/components/modals/LocalModelManageModal.tsx
+index 802ae40..eb95773 100644
+--- a/console/src/pages/Settings/Models/components/modals/LocalModelManageModal.tsx
++++ b/console/src/pages/Settings/Models/components/modals/LocalModelManageModal.tsx
+@@ -830,7 +830,7 @@ export function LocalModelManageModal({
+                         percent={currentModelDownloadPercent ?? 0}
+                         showInfo={false}
+                         status="active"
+-                        strokeColor="#ff7f16"
++                        strokeColor="#0891B2"
+                         strokeWidth={10}
+                       />
+                       <Tooltip title={t("models.localCancelDownloadAction")}>
+diff --git a/console/src/pages/Settings/Models/components/modals/local-models/LocalRuntimePanel.tsx b/console/src/pages/Settings/Models/components/modals/local-models/LocalRuntimePanel.tsx
+index 49a3afb..37ca41e 100644
+--- a/console/src/pages/Settings/Models/components/modals/local-models/LocalRuntimePanel.tsx
++++ b/console/src/pages/Settings/Models/components/modals/local-models/LocalRuntimePanel.tsx
+@@ -199,7 +199,7 @@ export const LocalRuntimePanel = memo(function LocalRuntimePanel({
+                 percent={progressPercent ?? 0}
+                 showInfo={false}
+                 status="active"
+-                strokeColor="#ff7f16"
++                strokeColor="#0891B2"
+                 strokeWidth={10}
+               />
+               <Tooltip title={t("models.localCancelDownloadAction")}>
+diff --git a/console/src/pages/Settings/Models/index.module.less b/console/src/pages/Settings/Models/index.module.less
+index f420e38..1b72624 100644
+--- a/console/src/pages/Settings/Models/index.module.less
++++ b/console/src/pages/Settings/Models/index.module.less
+@@ -242,7 +242,7 @@
+   font-size: 11px;
+   font-weight: 500;
+   background-color: rgba(255, 247, 230, 0.8);
+-  color: #ff7f16;
++  color: #0891B2;
+   border: 1px solid rgba(255, 127, 22, 0.2);
+ }
+ 
+@@ -425,7 +425,7 @@
+     box-shadow 0.2s ease;
+ 
+   &:focus-within {
+-    border-color: #ff7f16;
++    border-color: #0891B2;
+     box-shadow: 0 0 0 2px rgba(97, 92, 237, 0.12);
+   }
+ }
+@@ -1352,7 +1352,7 @@
+   }
+ 
+   .modelListItemStatusButton {
+-    color: #5eead4;
++    color: #22d3ee;
+     background: rgba(20, 184, 166, 0.14);
+   }
+ 
+@@ -1416,7 +1416,7 @@
+     color: rgba(255, 255, 255, 0.65) !important;
+ 
+     &:hover {
+-      color: #ff7f16 !important;
++      color: #0891B2 !important;
+     }
+   }
+ 
+@@ -1473,7 +1473,7 @@
+     background: #1a1a1a;
+ 
+     &:focus-within {
+-      border-color: #ff7f16;
++      border-color: #0891B2;
+     }
+   }
+ 
+diff --git a/console/src/pages/Settings/Security/components/FileGuardSection.tsx b/console/src/pages/Settings/Security/components/FileGuardSection.tsx
+index b404eb5..39c9ccc 100644
+--- a/console/src/pages/Settings/Security/components/FileGuardSection.tsx
++++ b/console/src/pages/Settings/Security/components/FileGuardSection.tsx
+@@ -119,7 +119,7 @@ export function FileGuardSection({ onSave }: FileGuardSectionProps = {}) {
+             )}
+             <code>{path}</code>
+             {isDir && (
+-              <Tag color="orange">{t("security.fileGuard.directory")}</Tag>
++              <Tag color="cyan">{t("security.fileGuard.directory")}</Tag>
+             )}
+           </Space>
+         );
+diff --git a/console/src/pages/Settings/Security/components/PreviewModal.tsx b/console/src/pages/Settings/Security/components/PreviewModal.tsx
+index 787d129..e20f38f 100644
+--- a/console/src/pages/Settings/Security/components/PreviewModal.tsx
++++ b/console/src/pages/Settings/Security/components/PreviewModal.tsx
+@@ -5,7 +5,7 @@ import { useTheme } from "../../../../contexts/ThemeContext";
+ 
+ const SEVERITY_COLORS: Record<string, string> = {
+   CRITICAL: "red",
+-  HIGH: "orange",
++  HIGH: "cyan",
+   MEDIUM: "gold",
+   LOW: "blue",
+   INFO: "default",
+@@ -63,7 +63,7 @@ export function PreviewModal({ rule, onClose }: PreviewModalProps) {
+         </p>
+         <p>
+           <strong>{t("security.rules.actionLabel")}:</strong>{" "}
+-          <Tag color="orange">{t("security.rules.actionApproval")}</Tag>
++          <Tag color="cyan">{t("security.rules.actionApproval")}</Tag>
+         </p>
+         <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+           <strong>{t("security.rules.descriptionLabel")}:</strong>{" "}
+diff --git a/console/src/pages/Settings/Security/components/RuleTable.tsx b/console/src/pages/Settings/Security/components/RuleTable.tsx
+index ed3baf2..deca27b 100644
+--- a/console/src/pages/Settings/Security/components/RuleTable.tsx
++++ b/console/src/pages/Settings/Security/components/RuleTable.tsx
+@@ -8,7 +8,7 @@ import styles from "../index.module.less";
+ 
+ const SEVERITY_COLORS: Record<string, string> = {
+   CRITICAL: "red",
+-  HIGH: "orange",
++  HIGH: "cyan",
+   MEDIUM: "gold",
+   LOW: "blue",
+   INFO: "default",
+diff --git a/console/src/pages/Settings/Security/components/SkillScannerSection.tsx b/console/src/pages/Settings/Security/components/SkillScannerSection.tsx
+index 784426f..a71b8fa 100644
+--- a/console/src/pages/Settings/Security/components/SkillScannerSection.tsx
++++ b/console/src/pages/Settings/Security/components/SkillScannerSection.tsx
+@@ -196,7 +196,7 @@ export function SkillScannerSection() {
+       key: "action",
+       width: 100,
+       render: (action: string) => (
+-        <Tag color={action === "blocked" ? "red" : "orange"}>
++        <Tag color={action === "blocked" ? "red" : "cyan"}>
+           {action === "blocked"
+             ? t("security.skillScanner.scanAlerts.actionBlocked")
+             : t("security.skillScanner.scanAlerts.actionWarned")}
+diff --git a/console/src/pages/Settings/Security/index.module.less b/console/src/pages/Settings/Security/index.module.less
+index e628d09..b61b2c9 100644
+--- a/console/src/pages/Settings/Security/index.module.less
++++ b/console/src/pages/Settings/Security/index.module.less
+@@ -117,17 +117,17 @@
+     color: #666 !important;
+ 
+     &:hover {
+-      color: #ff7f16 !important;
++      color: #0891B2 !important;
+     }
+   }
+ 
+   :global(.copaw-tabs-tab-active .copaw-tabs-tab-btn) {
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+     font-weight: 600;
+   }
+ 
+   :global(.copaw-tabs-ink-bar) {
+-    background: #ff7f16 !important;
++    background: #0891B2 !important;
+     height: 3px;
+     border-radius: 2px 2px 0 0;
+   }
+@@ -140,12 +140,12 @@
+     }
+ 
+     :global(.copaw-tabs-tab-active .copaw-tabs-tab-btn) {
+-      color: #ff7f16 !important;
++      color: #0891B2 !important;
+       font-weight: 600;
+     }
+ 
+     :global(.copaw-tabs-ink-bar) {
+-      background: #ff7f16 !important;
++      background: #0891B2 !important;
+     }
+   }
+ 
+@@ -155,11 +155,11 @@
+     }
+ 
+     :global(.copaw-tabs-tab-active .copaw-tabs-tab-btn) {
+-      color: #ff7f16 !important;
++      color: #0891B2 !important;
+     }
+ 
+     :global(.copaw-tabs-ink-bar) {
+-      background: #ff7f16 !important;
++      background: #0891B2 !important;
+     }
+   }
+ 
+@@ -299,16 +299,16 @@
+     color: #666 !important;
+ 
+     &:hover {
+-      color: #ff7f16 !important;
++      color: #0891B2 !important;
+     }
+   }
+ 
+   :global(.copaw-tabs-tab-active .copaw-tabs-tab-btn) {
+-    color: #ff7f16 !important;
++    color: #0891B2 !important;
+   }
+ 
+   :global(.copaw-tabs-ink-bar) {
+-    background: #ff7f16 !important;
++    background: #0891B2 !important;
+   }
+ }
+ 
+diff --git a/console/src/pages/Settings/SkillPool/index.module.less b/console/src/pages/Settings/SkillPool/index.module.less
+index 0e6f128..7228698 100644
+--- a/console/src/pages/Settings/SkillPool/index.module.less
++++ b/console/src/pages/Settings/SkillPool/index.module.less
+@@ -679,7 +679,7 @@
+ /* 鈹€鈹€鈹€ Tags 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
+ .descriptionText {
+   border-radius: 4px;
+-  background: rgba(43, 18, 0, 0.02);
++  background: rgba(8, 145, 178, 0.04);
+   box-sizing: border-box;
+   border: 1px solid #f3f1f0;
+   padding: 2px 4px;
+@@ -825,7 +825,7 @@
+   }
+ 
+   .selectedCard {
+-    border-color: #ff7f16 !important;
++    border-color: #0891B2 !important;
+     box-shadow: 0 0 0 1px rgba(255, 127, 22, 0.3) !important;
+   }
+ 
+diff --git a/console/src/pages/Settings/VoiceTranscription/index.module.less b/console/src/pages/Settings/VoiceTranscription/index.module.less
+index e7f7b06..1adfa70 100644
+--- a/console/src/pages/Settings/VoiceTranscription/index.module.less
++++ b/console/src/pages/Settings/VoiceTranscription/index.module.less
+@@ -51,7 +51,7 @@
+   margin-bottom: 16px;
+ 
+   &:hover {
+-    border: 1px solid #ff7f16;
++    border: 1px solid #0891B2;
+     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+   }
+ }
+diff --git a/console/src/styles/layout.css b/console/src/styles/layout.css
+index c767f28..02cf1c1 100644
+--- a/console/src/styles/layout.css
++++ b/console/src/styles/layout.css
+@@ -182,8 +182,8 @@ html.dark-mode .ant-pagination .ant-pagination-item a {
+ 
+ html.dark-mode .copaw-pagination .copaw-pagination-item-active,
+ html.dark-mode .ant-pagination .ant-pagination-item-active {
+-  background: #ff7f16 !important;
+-  border-color: #ff7f16 !important;
++  background: #0891B2 !important;
++  border-color: #0891B2 !important;
+ }
+ 
+ html.dark-mode .copaw-pagination .copaw-pagination-item-active a,
+@@ -210,7 +210,7 @@ html.dark-mode .copaw-table-column-sorter-up.active,
+ html.dark-mode .copaw-table-column-sorter-down.active,
+ html.dark-mode .ant-table-column-sorter-up.active,
+ html.dark-mode .ant-table-column-sorter-down.active {
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ /* Checkbox in table */
+@@ -222,8 +222,8 @@ html.dark-mode .ant-checkbox-inner {
+ 
+ html.dark-mode .copaw-checkbox-checked .copaw-checkbox-inner,
+ html.dark-mode .ant-checkbox-checked .ant-checkbox-inner {
+-  background: #ff7f16 !important;
+-  border-color: #ff7f16 !important;
++  background: #0891B2 !important;
++  border-color: #0891B2 !important;
+ }
+ 
+ /* Page titles (h1) */
+@@ -311,7 +311,7 @@ html.dark-mode .ant-select-item-option-active {
+ html.dark-mode .copaw-select-item-option-selected,
+ html.dark-mode .ant-select-item-option-selected {
+   background: rgba(97, 92, 237, 0.2) !important;
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ /* Form labels */
+@@ -392,7 +392,7 @@ html.dark-mode
+   .ant-picker-time-panel-cell-selected
+   .ant-picker-time-panel-cell-inner {
+   background: rgba(97, 92, 237, 0.2) !important;
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ /* DatePicker / RangePicker calendar panel */
+@@ -462,7 +462,7 @@ html.dark-mode .ant-picker-cell-disabled {
+ /* Today marker */
+ html.dark-mode .copaw-picker-cell-today .copaw-picker-cell-inner::before,
+ html.dark-mode .ant-picker-cell-today .ant-picker-cell-inner::before {
+-  border-color: #ff7f16 !important;
++  border-color: #0891B2 !important;
+ }
+ 
+ /* Selected start/end cell */
+@@ -472,7 +472,7 @@ html.dark-mode .copaw-picker-cell-range-start .copaw-picker-cell-inner,
+ html.dark-mode .ant-picker-cell-range-start .ant-picker-cell-inner,
+ html.dark-mode .copaw-picker-cell-range-end .copaw-picker-cell-inner,
+ html.dark-mode .ant-picker-cell-range-end .ant-picker-cell-inner {
+-  background: #ff7f16 !important;
++  background: #0891B2 !important;
+   color: #fff !important;
+ }
+ 
+@@ -497,7 +497,7 @@ html.dark-mode
+ html.dark-mode
+   .copaw-picker-cell-in-view.copaw-picker-cell-range-hover-end::after,
+ html.dark-mode .ant-picker-cell-in-view.ant-picker-cell-range-hover-end::after {
+-  border-color: #ff7f16 !important;
++  border-color: #0891B2 !important;
+ }
+ 
+ /* Panel footer (OK button area) */
+@@ -509,7 +509,7 @@ html.dark-mode .ant-picker-footer {
+ 
+ html.dark-mode .copaw-picker-today-btn,
+ html.dark-mode .ant-picker-today-btn {
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ /* Divider between two panels in RangePicker */
+@@ -656,12 +656,12 @@ html.dark-mode .ant-slider-rail {
+ 
+ html.dark-mode .copaw-slider-track,
+ html.dark-mode .ant-slider-track {
+-  background-color: #ff7f16 !important;
++  background-color: #0891B2 !important;
+ }
+ 
+ html.dark-mode .copaw-slider-mark-text,
+ html.dark-mode .ant-slider-mark-text {
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ html.dark-mode .copaw-form-item-label > label .copaw-form-item-tooltip,
+@@ -671,7 +671,7 @@ html.dark-mode .ant-form-item-label > label .ant-form-item-tooltip {
+ 
+ html.dark-mode .copaw-slider-handle::after,
+ html.dark-mode .ant-slider-handle::after {
+-  box-shadow: 0 0 0 2px #ff7f16 !important;
++  box-shadow: 0 0 0 2px #0891B2 !important;
+   background-color: #1f1f1f !important;
+ }
+ 
+@@ -780,7 +780,7 @@ html.dark-mode [class*="chat-anywhere"] [class*="message"] code {
+ }
+ 
+ html.dark-mode [class*="chat-anywhere"] [class*="message"] a {
+-  color: #ff7f16 !important;
++  color: #0891B2 !important;
+ }
+ 
+ #root {
+@@ -845,7 +845,7 @@ html.dark-mode .copaw-sender-content {
+ /* Menu selected item in light mode */
+ .copaw-menu-item-selected,
+ .ant-menu-item-selected {
+-  background: rgba(43, 18, 0, 0.08) !important;
++  background: rgba(8, 145, 178, 0.1) !important;
+   color: inherit !important;
+ }
+ 
 diff --git a/console/src/vite-env.d.ts b/console/src/vite-env.d.ts
-index a4eeaf2..d37f2ba 100644
+index a4eeaf2..2602562 100644
 --- a/console/src/vite-env.d.ts
 +++ b/console/src/vite-env.d.ts
-@@ -1,5 +1,10 @@
+@@ -1,5 +1,9 @@
  /// <reference types="vite/client" />
  
 +interface ImportMetaEnv {
-+  /** Set to "1" for AxiMate Ripple desktop branding (Windows product build). */
 +  readonly VITE_RIPPLE_DESKTOP?: string;
 +}
 +
  declare module "dayjs" {
    interface Dayjs {
      fromNow(withoutSuffix?: boolean): string;
+diff --git a/console/vite.config.ts b/console/vite.config.ts
+index 918f52e..9729779 100644
+--- a/console/vite.config.ts
++++ b/console/vite.config.ts
+@@ -7,12 +7,14 @@ export default defineConfig(({ mode }) => {
+   // Empty = same-origin; frontend and backend served together, no hardcoded host.
+   // Use a dedicated Vite-prefixed key so unrelated shell BASE_URL values don't leak into the build.
+   const apiBaseUrl = env.VITE_API_BASE_URL ?? "";
++  const viteRippleDesktop = env.VITE_RIPPLE_DESKTOP ?? "1";
+ 
+   return {
+     define: {
+       VITE_API_BASE_URL: JSON.stringify(apiBaseUrl),
+       TOKEN: JSON.stringify(env.TOKEN || ""),
+       MOBILE: false,
++      "import.meta.env.VITE_RIPPLE_DESKTOP": JSON.stringify(viteRippleDesktop),
+     },
+     plugins: [react()],
+     css: {
